@@ -1,4 +1,4 @@
-"""Common preprocessing for oz-cancer-subtype (7조).
+"""Common preprocessing for oz-ai-healthcare-7th-dacon-cancer-subtype-team7 (7조).
 
 Rules
 - fit on train only; apply the same transform to test

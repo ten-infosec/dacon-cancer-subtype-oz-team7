@@ -1,6 +1,6 @@
-# oz-cancer-subtype — 7조
+# [오즈코딩스쿨 AI 헬스케어 7기] DACON 암환자 유전체 변이 기반 암종 분류 해커톤 — 7조
 
-**[초격차] AI 헬스케어 7기 해커톤 · 암환자 유전체 변이 정보를 활용한 암종 분류 AI 모델 개발 (DACON × 오즈코딩스쿨)**
+레포: `oz-ai-healthcare-7th-dacon-cancer-subtype-team7`
 
 환자별 유전자 변이 정보(4,384개 유전자, WT/변이 표기)로 26개 암 아형(SUBCLASS)을 예측하는 다중 분류 과제. 평가 지표 Macro F1.
 

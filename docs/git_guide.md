@@ -4,8 +4,8 @@
 
 ```bash
 # 1) 처음 한 번 — 레포 받기
-git clone https://github.com/ten-infosec/oz-cancer-subtype.git
-cd oz-cancer-subtype
+git clone https://github.com/ten-infosec/oz-ai-healthcare-7th-dacon-cancer-subtype-team7.git
+cd oz-ai-healthcare-7th-dacon-cancer-subtype-team7
 
 # 2) 내 브랜치 만들기 (이름-주제)
 git switch -c feat/myungseok-mutation-types
