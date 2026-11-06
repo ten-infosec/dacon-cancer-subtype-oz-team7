@@ -5,10 +5,10 @@ Rules
 - every feature here is computed per patient (row) or from train-only lists -> no leakage
 - feature names use only [A-Za-z0-9_] so LightGBM/XGBoost accept them
 
-Pipeline (E7, group-CV Macro F1 0.429 with untuned XGBoost):
-  P1 binary 0/1 -> P2 drop genes never mutated in train -> P4 per-patient counts
-  -> Top8-1 mutation-type counts/ratios -> Top8-2 amino-acid substitution patterns
-  -> Top8-5 driver-gene truncating/missense 2-channel
+Pipeline (E8, group-CV Macro F1 0.450 with untuned XGBoost):
+  P0 fill test NaN as WT -> P1 binary 0/1 -> P2 drop genes never mutated in train -> P4 per-patient counts
+  -> Top8-1 mutation-type counts/ratios -> Top8-2 amino-acid substitution patterns (12) + chemical-group transitions (6x6)
+  -> Top8-5 driver-gene truncating/missense 2-channel -> Top8-4 Sanchez-Vega 10-pathway burden
 """
 import hashlib
 import re
@@ -23,6 +23,11 @@ SUBS = ["E_X", "S_X", "R_X", "Q_X", "W_X",          # X = stop (*)
         "R_Q", "R_W", "R_H", "G_D", "G_V", "P_S", "P_L"]
 _SUB_KEY = {s: (s[0], "*" if s.endswith("_X") else s[-1]) for s in SUBS}
 REFS = Path(__file__).resolve().parent.parent / "refs"
+# amino-acid chemical groups (Top8-2 extension, E8): aliphatic / aromatic / polar / acidic / basic / special
+AA_GROUPS = {"ali": set("AVILM"), "aro": set("FWY"), "pol": set("STNQC"),
+             "acid": set("DE"), "base": set("KRH"), "spec": set("GP")}
+AA2G = {a: g for g, members in AA_GROUPS.items() for a in members}
+GN = list(AA_GROUPS)
 
 
 # ---------- column helpers ----------
@@ -34,6 +39,17 @@ def gene_columns(df: pd.DataFrame):
 def profile_hash(df: pd.DataFrame, genes):
     """Group id for StratifiedGroupKFold: identical mutation profiles share a group."""
     return df[genes].apply(lambda r: hashlib.md5("|".join(r.values).encode()).hexdigest(), axis=1).values
+
+
+def load_pathways(genes):
+    """Sanchez-Vega 2018 (Cell, Table S3) 10 oncogenic pathways -> {pathway_key: [genes present in our columns]}."""
+    pw = pd.read_csv(REFS / "pathways_sanchezvega2018.csv")
+    pw = pw[pw["gene"].isin(set(genes))]
+    out = {}
+    for name, sub in pw.groupby("pathway"):
+        key = re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_")
+        out[key] = sub["gene"].unique().tolist()
+    return out
 
 
 def load_driver_genes(genes):
@@ -78,6 +94,8 @@ def row_features(cells, genes, driver_genes):
     """Features for ONE patient. `cells` = iterable of that patient's gene values in `genes` order."""
     n = ns = nm = nt = nfs = 0
     sub = {s: 0 for s in SUBS}
+    grp = {f"{a}_{b}": 0 for a in GN for b in GN}
+    n_grp = 0
     trunc = {g: 0 for g in driver_genes}
     mis = {g: 0 for g in driver_genes}
     dset = trunc.keys()
@@ -99,6 +117,9 @@ def row_features(cells, genes, driver_genes):
                 for s, (sa, sb) in _SUB_KEY.items():
                     if a == sa and b == sb:
                         sub[s] += 1
+                if kind == "M" and a in AA2G and b in AA2G:      # E8: chemical-group transition
+                    grp[f"{AA2G[a]}_{AA2G[b]}"] += 1
+                    n_grp += 1
             if g in dset:
                 if kind == "T":
                     trunc[g] = 1
@@ -114,7 +135,21 @@ def row_features(cells, genes, driver_genes):
     for g in driver_genes:
         out["trunc_" + g] = trunc[g]
         out["mis_" + g] = mis[g]
+    dg = max(n_grp, 1)
+    for k, v in grp.items():
+        out["grp_" + k] = v
+        out["grpr_" + k] = v / dg
     return out
+
+
+def pathway_features(binary: pd.DataFrame, pathways: dict) -> pd.DataFrame:
+    """Per-patient mutated-gene count and fraction for each pathway (uses 0/1 matrix only)."""
+    out = {}
+    for key, gs in pathways.items():
+        hits = binary[gs].sum(axis=1)
+        out["pw_" + key] = hits
+        out["pwf_" + key] = hits / len(gs)
+    return pd.DataFrame(out, index=binary.index)
 
 
 def engineered(df: pd.DataFrame, genes, driver_genes) -> pd.DataFrame:
@@ -126,10 +161,11 @@ def engineered(df: pd.DataFrame, genes, driver_genes) -> pd.DataFrame:
 def build_features(train: pd.DataFrame, test: pd.DataFrame, level: str = "E7"):
     """Return X_train, X_test with identical columns.
     level: 'E5' (binary + n_mut) | 'E6a' (+type) | 'E6b' (+substitution) | 'E7' (+driver 2ch)
+           | 'E8' (+ amino-acid group transitions 72 + pathway burden 20)  <- current team model, group-CV 0.450
     """
     genes = gene_columns(train)
     train, test = fill_missing(train, genes), fill_missing(test, genes)
-    drivers = load_driver_genes(genes) if level == "E7" else []
+    drivers = load_driver_genes(genes) if level in ("E7", "E8") else []
     b_tr, b_te = to_binary(train, genes), to_binary(test, genes)
     cols = keep_informative(b_tr)                       # train only
     f_tr, f_te = engineered(train, genes, drivers), engineered(test, genes, drivers)
@@ -139,8 +175,14 @@ def build_features(train: pd.DataFrame, test: pd.DataFrame, level: str = "E7"):
                  "r_silent", "r_missense", "r_trunc", "r_fs"]
     if level in ("E6b", "E7"):
         keep += [c for c in f_tr.columns if c.startswith("sub")]
-    if level == "E7":
+    if level in ("E7", "E8"):
         keep += [c for c in f_tr.columns if c.startswith(("trunc_", "mis_"))]
+    if level == "E8":
+        keep += [c for c in f_tr.columns if c.startswith("grp")]
     X_tr = pd.concat([b_tr[cols], f_tr[keep]], axis=1)
     X_te = pd.concat([b_te[cols], f_te[keep]], axis=1)
+    if level == "E8":
+        pws = load_pathways(genes)
+        X_tr = pd.concat([X_tr, pathway_features(b_tr, pws)], axis=1)
+        X_te = pd.concat([X_te, pathway_features(b_te, pws)], axis=1)
     return X_tr, X_te
