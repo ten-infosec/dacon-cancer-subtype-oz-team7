@@ -43,8 +43,16 @@ def load_driver_genes(genes):
 
 
 # ---------- P1 / P2 ----------
+def fill_missing(df: pd.DataFrame, genes) -> pd.DataFrame:
+    """test.csv has 237 empty cells (128 patients, 25 genes); train has none.
+    We treat an empty cell as 'no information' = WT. Call this once right after read_csv."""
+    out = df.copy()
+    out[genes] = out[genes].fillna("WT")
+    return out
+
+
 def to_binary(df: pd.DataFrame, genes) -> pd.DataFrame:
-    return (df[genes] != "WT").astype(np.uint8)
+    return (df[genes].notna() & (df[genes] != "WT")).astype(np.uint8)
 
 
 def keep_informative(binary_train: pd.DataFrame):
@@ -74,7 +82,7 @@ def row_features(cells, genes, driver_genes):
     mis = {g: 0 for g in driver_genes}
     dset = trunc.keys()
     for g, cell in zip(genes, cells):
-        if cell == "WT":
+        if cell == "WT" or not isinstance(cell, str):   # NaN (test only) -> treated as WT
             continue
         for tok in cell.split(" "):
             n += 1
@@ -120,6 +128,7 @@ def build_features(train: pd.DataFrame, test: pd.DataFrame, level: str = "E7"):
     level: 'E5' (binary + n_mut) | 'E6a' (+type) | 'E6b' (+substitution) | 'E7' (+driver 2ch)
     """
     genes = gene_columns(train)
+    train, test = fill_missing(train, genes), fill_missing(test, genes)
     drivers = load_driver_genes(genes) if level == "E7" else []
     b_tr, b_te = to_binary(train, genes), to_binary(test, genes)
     cols = keep_informative(b_tr)                       # train only
