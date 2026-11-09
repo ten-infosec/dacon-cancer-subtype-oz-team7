@@ -56,3 +56,15 @@ CESC 0.13 · PAAD 0.15 · KIPAN 0.16 · SARC 0.19 · LUAD 0.24 · GBMLGG 0.28
 네 모델 모두 CV−0.08~0.14 → test 분포 차이(공통) + 우리 특성 과적합(추가 0.05). 토요일: ① E7 ② E8−드라이버 2채널 ③ AI노트북 특성+우리 설정.
 
 교훈: CV와 리더보드를 나란히 기록. 0.1 이상 벌어지면 규제 강화·특성 축소.
+
+## 11.09 추가 모델 비교 (grouped CV Macro F1)
+| 파일 | 모델 | 설정 | CV Macro F1 (평균 ± 표준편차) | 시간 |
+|---|---|---|---:|---|
+| 02 | ExtraTrees 튜닝 | E8; 400 trees, max_depth=35, max_features=0.15, min_samples_split=5, min_samples_leaf=1, class_weight=balanced; 4-fold, 16조합 탐색 | 0.3940 ± 0.0117 | 탐색 총시간 미기록 (64 fits) |
+| 03 | RandomForest | E8; 400 trees, max_features=sqrt, min_samples_leaf=2, class_weight=balanced_subsample | 0.3957 ± 0.0093 | 1.71초 |
+| 03 | HistGradientBoosting | E8; learning_rate=0.08, max_iter=160, max_leaf_nodes=15, min_samples_leaf=20, l2=1.0, balanced sample_weight | 0.4111 ± 0.0156 | 243.57초 |
+| 03 | SoftVoting (RF+HGB) | 위 RF/HGB 예측 확률 균등 평균 (50:50) | 0.4196 ± 0.0131 | 약 245.27초 (합산) |
+| 04 | RandomForest | E8; 400 trees, max_features=sqrt, min_samples_leaf=2, class_weight=balanced_subsample | 0.3957 ± 0.0093 | 1.64초 |
+| 04 | TF-IDF LinearSVC | gene/mutation/event 토큰; TF-IDF min_df=2, max_features=250k, sublinear_tf; C=0.5, class_weight=balanced | 0.3682 ± 0.0091 | 0.27초 |
+| 04 | RF+TF-IDF LinearSVC 고정 앙상블 | E8 RF + TF-IDF LinearSVC; 50:50 | 0.4183 ± 0.0116 | 1.91초 (합산) |
+| 04 | RF+TF-IDF LinearSVC OOF 튜닝 앙상블 | RF 0.20 + SVC 0.80; SVC softmax temperature=1.0 | 0.4469 ± 0.0105 (OOF 선택 점수 0.4477) | 1.91초 (합산) |
