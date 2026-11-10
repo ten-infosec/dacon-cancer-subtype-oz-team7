@@ -1,0 +1,1023 @@
+<title>암종 분류 해커톤 팀 가이드</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lab-notebook guide — sticky section nav, one reading column, data panels break wider */
+:root{
+  --bg:#F4F6F7; --surface:#FFFFFF; --ink:#333A40; --muted:#69737C; --line:#DCE1E5;
+  --primary:#2F5D8A; --primary-soft:#E3ECF5; --accent:#C2533B; --accent-soft:#F6E4DF;
+  --good:#2E7D5B; --good-soft:#E0F0E8;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2.25rem; --s7:3.5rem;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14181B; --surface:#1C2125; --ink:#E3E7EA; --muted:#9AA4AC; --line:#2D343A;
+  --primary:#86ADD8; --primary-soft:#1F2D3B; --accent:#E2826C; --accent-soft:#3A2420;
+  --good:#6FC39C; --good-soft:#1C3229; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14181B; --surface:#1C2125; --ink:#E3E7EA; --muted:#9AA4AC; --line:#2D343A;
+  --primary:#86ADD8; --primary-soft:#1F2D3B; --accent:#E2826C; --accent-soft:#3A2420;
+  --good:#6FC39C; --good-soft:#1C3229; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:860px;margin:0 auto;padding-block:var(--s6) var(--s7)}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.4rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0;max-width:66ch}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{background:var(--primary-soft);color:var(--primary);padding:.05em .35em;border-radius:4px}
+a{color:var(--primary)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+/* header */
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header.top{display:grid;gap:var(--s3);padding-bottom:var(--s5);border-bottom:1px solid var(--line)}
+.lede{color:var(--muted);font-size:1.02rem}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3);margin-top:var(--s4)}
+.fact{display:grid;gap:2px}
+.fact b{font-size:1.05rem;font-variant-numeric:tabular-nums}
+.fact span{font-size:.8rem;color:var(--muted)}
+
+/* nav */
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+  margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:var(--s2) max(16px,env(safe-area-inset-left,0px));
+  border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+nav.toc .in{max-width:860px;margin:0 auto;display:flex;gap:var(--s2)}
+nav.toc a{font-size:.85rem;text-decoration:none;color:var(--muted);padding:.3rem .6rem;border-radius:6px}
+nav.toc a:hover{background:var(--primary-soft);color:var(--primary)}
+
+section{padding-top:var(--s6);display:grid;gap:var(--s4);scroll-margin-top:3.5rem}
+.sec-head{display:grid;gap:var(--s1)}
+.tldr{border-left:3px solid var(--primary);background:var(--primary-soft);padding:var(--s3) var(--s4);border-radius:0 var(--r) var(--r) 0}
+.tldr .eyebrow{color:var(--primary)}
+
+/* lists */
+ol.rules{margin:0;padding:0;list-style:none;display:grid;gap:var(--s3);counter-reset:r}
+ol.rules li{counter-increment:r;display:grid;grid-template-columns:2rem 1fr;gap:var(--s3);align-items:start}
+ol.rules li::before{content:counter(r);font-family:var(--f-mono);font-weight:500;color:var(--primary);
+  border:1px solid var(--primary);border-radius:50%;width:1.8rem;height:1.8rem;display:grid;place-items:center;font-size:.85rem}
+ol.rules li > div{min-width:0}
+ol.rules li b{display:block}
+ol.rules li span{color:var(--muted);font-size:.92rem}
+
+/* specimen row */
+.specimen{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.specimen table{border-collapse:collapse;font-family:var(--f-mono);font-size:.85rem;min-width:620px;width:100%}
+.specimen th,.specimen td{padding:.45rem .7rem;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.specimen th{color:var(--muted);font-weight:500;background:var(--bg)}
+.specimen td.mut{color:var(--accent);font-weight:500;background:var(--accent-soft)}
+.specimen td.wt{color:var(--muted)}
+.caption{font-size:.82rem;color:var(--muted)}
+
+.anatomy{display:flex;flex-wrap:wrap;gap:var(--s4);align-items:flex-end;font-family:var(--f-mono);padding:var(--s4);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.anatomy .part{display:grid;gap:4px;justify-items:center}
+.anatomy .glyph{font-size:2rem;line-height:1;font-weight:500}
+.anatomy .glyph.a{color:var(--primary)} .anatomy .glyph.n{color:var(--ink)} .anatomy .glyph.b{color:var(--accent)}
+.anatomy .lab{font-family:var(--f-body);font-size:.78rem;color:var(--muted);text-align:center;max-width:9rem}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.tbl table{border-collapse:collapse;width:100%;font-size:.9rem}
+.tbl th,.tbl td{padding:.55rem .8rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-weight:500;color:var(--muted);background:var(--bg);font-size:.82rem;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.num{font-variant-numeric:tabular-nums;text-align:right!important;white-space:nowrap}
+
+/* charts */
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s4)}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);display:grid;gap:var(--s3);min-width:0}
+.bars{display:grid;gap:3px}
+.bar{display:grid;grid-template-columns:4.2rem 1fr 3rem;gap:var(--s2);align-items:center;font-size:.78rem}
+.bar .k{font-family:var(--f-mono);color:var(--ink)}
+.bar .track{height:12px;background:var(--bg);border-radius:2px;position:relative;overflow:hidden}
+.bar .fill{position:absolute;inset:0 auto 0 0;background:var(--primary);border-radius:2px}
+.bar.low .fill{background:var(--accent)}
+.bar .v{font-family:var(--f-mono);text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:var(--s3);font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
+/* step cards (preprocessing) */
+.steps{display:grid;gap:var(--s4)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4) var(--s5);display:grid;gap:var(--s3)}
+.step-h{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:baseline}
+.step-h .tag{font-family:var(--f-mono);font-size:.75rem;color:var(--primary);border:1px solid var(--primary);border-radius:4px;padding:0 .4rem}
+.pwr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s3)}
+.pwr > div{display:grid;gap:2px;min-width:0}
+.pwr .lab{font-size:.75rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.pwr p{font-size:.92rem}
+.analogy{font-size:.88rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:var(--s2)}
+.leak{font-size:.82rem;display:inline-flex;gap:.4rem;align-items:center;color:var(--good);background:var(--good-soft);padding:.15rem .55rem;border-radius:999px;width:max-content;max-width:100%}
+
+/* prompts */
+.prompt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:grid;gap:var(--s2);padding:var(--s3) var(--s4)}
+.prompt-h{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:center;justify-content:space-between}
+.prompt-h h3{font-size:.98rem}
+.prompt pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:.82rem;line-height:1.55;background:var(--bg);border-radius:6px;padding:var(--s3);color:var(--ink)}
+.copy{font:inherit;font-size:.78rem;padding:.25rem .6rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--primary);cursor:pointer}
+.copy:hover{background:var(--primary-soft)}
+.copy.done{color:var(--good);border-color:var(--good)}
+
+/* experiment */
+.delta{font-family:var(--f-mono);font-size:.85rem}
+.delta.up{color:var(--good)} .delta.down{color:var(--accent)}
+.pill{font-size:.75rem;padding:.1rem .5rem;border-radius:999px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.pill.best{background:var(--good-soft);color:var(--good);font-weight:700}
+
+/* timeline */
+.days{display:grid;gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.day{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--s4);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
+.day:last-child{border-bottom:0}
+.day .d{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.day .d b{display:block;color:var(--ink);font-family:var(--f-body)}
+.day ul{margin:0;padding-left:1.1rem}
+.day.deadline{background:var(--accent-soft)}
+.day > div{min-width:0}
+
+/* glossary */
+dl.gloss{display:grid;grid-template-columns:minmax(9rem,max-content) 1fr;gap:var(--s2) var(--s4);margin:0}
+dl.gloss dt{font-weight:700}
+dl.gloss dd{margin:0;color:var(--ink)}
+dl.gloss dd small{color:var(--muted);display:block}
+
+/* checklist */
+ul.check{list-style:none;margin:0;padding:0;display:grid;gap:var(--s2)}
+ul.check label{display:flex;gap:var(--s2);align-items:flex-start;cursor:pointer}
+ul.check input{margin-top:.35rem;accent-color:var(--primary)}
+
+footer{margin-top:var(--s7);padding-top:var(--s4);border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+
+@media (max-width:560px){
+  .day{grid-template-columns:1fr;gap:var(--s1)}
+  dl.gloss{grid-template-columns:1fr} dl.gloss dd{margin-bottom:var(--s2)}
+  .step{padding:var(--s4)}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">DACON × 오즈코딩스쿨 · 초격차 AI 헬스케어 7기 해커톤</div>
+  <h1>암종 분류 해커톤 팀 가이드</h1>
+  <p class="eyebrow">7조 · 엄태은(팀장) · 이명석 · 김민준 · 신혜원</p>
+  <p class="lede">유전자 변이 정보로 암의 아형(SUBCLASS)을 맞히는 대회의 선행 가이드라인입니다. 코드를 짜기 전에 팀 전원이 알아야 할 규칙 · 데이터의 한계 · 선행 연구 · 주의점을 먼저 정리했고, 실험 기록은 진행하며 갱신합니다. 처음이라면 <b>숙지사항 13</b>부터 읽으세요.</p>
+  <div class="facts">
+    <div class="fact"><b>11.09 – 11.10</b><span>팀 실험 · 화 저녁 확정</span></div>
+    <div class="fact"><b>11.11 – 11.12</b><span>발표 연습 · 정리</span></div>
+    <div class="fact"><b>11.13 11:50</b><span>리더보드 마감</span></div>
+    <div class="fact"><b>11.13 13:00</b><span>발표 (팀당 20분)</span></div>
+    <div class="fact"><b>Macro F1</b><span>평가 지표</span></div>
+    <div class="fact"><b>하루 4회</b><span>리더보드 제출 한도</span></div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="목차"><div class="in">
+  <a href="#overview">한눈에 보기</a><a href="#today">오늘 할 일</a><a href="#musts">숙지사항</a><a href="#strategy">팀 전략</a><a href="#qa">OT Q&amp;A</a><a href="#rules">팀 원칙</a><a href="#data">데이터 이해</a><a href="#domain">도메인 기초</a><a href="#eda">EDA</a><a href="#caution">주의점</a>
+  <a href="#prep">전처리</a><a href="#papers">논문 상세</a><a href="#lit">논문 요약·파생변수</a><a href="#prompts">조사 프롬프트</a><a href="#exp">실험 기록</a><a href="#care">맞춤형 치료</a><a href="#plan">일정</a>
+  <a href="#gloss">용어</a><a href="#submit">제출 체크</a>
+</div></nav>
+
+<!-- ================= OVERVIEW ================= -->
+<section id="overview">
+  <div class="sec-head"><div class="eyebrow">한눈에 보기</div><h2>이 해커톤을 한 장으로</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:9rem">물음</th><th>답</th><th style="width:8rem">자세히</th></tr></thead>
+    <tbody>
+      <tr><td><b>무엇을 하나</b></td><td>환자 한 명의 유전자 4,384개 변이 유무로 암 아형 26개 중 하나를 맞힌다. 평가는 Macro F1 (소수 아형도 같은 비중)</td><td><a href="#data">데이터 이해</a></td></tr>
+      <tr><td><b>얼마나 어렵나</b></td><td>점 돌연변이만 쓴 선행 연구는 정확도 50–68%. 우리 데이터는 복제수 변이·KRAS 등 핵심 유전자가 없고, 라벨이 겹치는 환자 445쌍이 있어 천장이 낮다</td><td><a href="#caution">주의점</a> · <a href="#papers">논문</a></td></tr>
+      <tr><td><b>지금 점수</b></td><td>베이스라인 0.305 → 전처리·파생변수만으로 CV <b>0.450</b> (그룹 5-fold). 리더보드는 <b>0.354</b>(명석 AI 노트북)가 최고, 우리 E8 0.307 — CV와 리더보드가 어긋나 원인 추적 중. 기각: 침묵 변이 제거, 중복 토큰 수, 임계값 보정, 계층 후처리</td><td><a href="#exp">실험 기록</a></td></tr>
+      <tr><td><b>논문이 말하는 것</b></td><td>① 환자 단위 요약 변수(변이 수·종류·패턴)가 가장 큰 개선 ② 선형 모델 + 특성 선택이 희소 데이터에 강함 ③ 승객 변이도 신호 ④ 학습 데이터 밖에서는 크게 하락 ⑤ 확신도 기반 선별로 임상 연결</td><td><a href="#papers">논문 상세</a></td></tr>
+      <tr><td><b>다음 실험</b></td><td>토: 리더보드로 특성 원인 확정 (E7 · E8−드라이버 · AI 특성) → 일: 모델 5종 비교 → 월: 핫스팟·FLAGS·MMR/POLE(팀원) → 화: 확정·경량화</td><td><a href="#lit">파생변수</a></td></tr>
+      <tr><td><b>일정</b></td><td>11.07–08 주말 팀 휴식·팀장 단독 실험 → <b>11.09–10 팀 실험, 11.10(화) 저녁 최종 확정</b> → 11.11–12 PPT·리허설 3회 → 11.13 발표 20분</td><td><a href="#plan">일정</a></td></tr>
+      <tr><td><b>절대 금지</b></td><td>test로 fit · test EDA · 외부 데이터 학습 · 과거 대회 코드 · 재현 불가 코드 → 하나라도 걸리면 1등도 제외</td><td><a href="#rules">팀 원칙</a></td></tr>
+      <tr><td><b>발표의 차별점</b></td><td>점수가 아니라 "왜 이 점수인가"를 설명: 데이터 구조(중복 환자·누락 유전자) · 논문 근거 · 실험 기록 · 경량화 · 맞춤형 치료 시나리오</td><td><a href="#care">맞춤형 치료</a></td></tr>
+      <tr><td><b>팀 · 협업 공간</b></td><td>7조 · 엄태은(팀장) · 이명석 · 김민준 · 신혜원<br>코드: <a href="https://github.com/ten-infosec/dacon-cancer-subtype-oz-team7">GitHub 레포</a> · 대화: <a href="https://discord.com/invite/7kNFqKrXX">팀 디스코드</a> · 제출·기록: 노션 7조 페이지 · 이 페이지: 팀 가이드</td><td><a href="#today">오늘 할 일</a></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= TODAY ================= -->
+<section id="today">
+  <div class="sec-head"><div class="eyebrow">11.09 월 · 팀 Day 1</div><h2>지금 어디까지 왔고, 오늘 무엇을 하나</h2></div>
+  <h3>진행 일지 (매일 한 줄씩 — 발표 "과정" 장의 원재료)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>날짜</th><th>한 일</th><th>결과 · 숫자</th><th>배운 것 / 결정</th></tr></thead>
+    <tbody>
+      <tr><td><b>11.06 금</b><br><span class="caption">Day 1</span></td><td>규정·데이터·논문 조사 → 가이드. 레포 생성·push. 파이프라인 E0→E8. 리더보드 4회. 팀원 모델 2개 코드 리뷰(test-fit 위반 수정). 명석님 PR #1(<code>notebooks/01myeongseok.ipynb</code>, 브랜치→PR→리뷰→머지) — 팀 첫 PR 완주</td><td>CV 0.305 → <b>0.450</b>. 리더보드 최고 <b>0.354</b>(명석 AI 노트북), E8 0.307, 혜원 스태킹 0.253</td><td>CV≠리더보드(전 모델 −0.08~0.14). 하이퍼파라미터 가설 기각 → 특성 의심. test 빈칸 237·중복 토큰·STES 쏠림 확인. 모델 확정은 11.10(화) 저녁으로 (주말 팀 휴식, 월요일 팀 시작)</td></tr>
+      <tr><td><b>11.07–08 주말</b></td><td>팀 휴식. 팀장 PC 재설치로 제출·실험 미진행. 금요일 밤 사전 실험(임계값·경량화·모델 5종)만 결과 확보</td><td>임계값 보정 기각(0.434→0.426) · 경량화 300유전자 −0.015 · XGBoost &gt; LightGBM &gt; 선형 &gt; MLP</td><td>주말 계획은 월요일로 이월. 교훈: 중요한 작업 전엔 환경을 건드리지 않기</td></tr>
+      <tr><td><b>11.09 월</b><br><span class="caption">팀 Day 1</span></td><td>역할 확정: 명석 모델 개선(기준 = 명석 노트북) · 혜원 맞춤형 치료·데이터 해석 · 민준 분석 그림 · 태은 통합·제출·재현. 제출 ③ AI 특성+우리 설정</td><td>③ 리더보드 <b>0.345</b> (CV 0.451) → 명석 특성 세트가 리더보드에서 강한 것 확정. 같은 특성에 규제 설정 +0.009</td><td><b>팀 기준 = 명석 노트북.</b> 우리 E8 특성 중 train에만 맞는 것 존재(드라이버 2채널 의심). 남은 3회는 명석 "하나씩 바꾼 비교"에</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="tldr" style="border-color:var(--accent)"><div class="eyebrow">11.06 16:30 · 첫 리더보드 결과</div>
+    <p><b>CV와 리더보드가 크게 어긋났습니다.</b> 우리 E8은 CV 0.450인데 리더보드 <b>0.307</b>, 팀원 AI 노트북 모델은 CV 0.437(단일 홀드아웃)인데 리더보드 <b>0.354</b>. 둘 다 CV보다 낮지만 우리 쪽 하락(−0.14)이 훨씬 큽니다.</p>
+    <p>해석: 두 모델의 가장 큰 차이는 <b>하이퍼파라미터</b>입니다. 우리는 깊이 6·학습률 0.1·규제 없음(train을 세게 외움), AI 노트북은 깊이 4·학습률 0.05·colsample 0.6·lambda 5(얕고 느리게, 규제 많이). test가 train과 조금 다르면 규제 많은 쪽이 리더보드에서 이깁니다. 지금 딱 그 그림입니다.</p>
+    <p><b>확인 실험 결과 (16:50): 가설 기각.</b> E8 특성 그대로 + 규제 많은 설정(E8_hpB)을 제출 → 리더보드 <b>0.305</b> (E8 0.307과 같음). 설정을 바꿔도 그대로이므로 원인은 하이퍼파라미터가 아니라 <b>특성</b>입니다.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>#</th><th>모델</th><th class="num">CV</th><th class="num">리더보드</th><th class="num">차이</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>팀원 AI 노트북 (0/1 전체 + 치환 20×20 + 6그룹 + 경로 7, 규제 XGB)</td><td class="num">0.437</td><td class="num"><b>0.354</b></td><td class="num">−0.08</td></tr>
+        <tr><td>2</td><td>우리 E8 (깊이 6)</td><td class="num">0.450</td><td class="num">0.307</td><td class="num">−0.14</td></tr>
+        <tr><td>3</td><td>우리 E8 + 규제 설정 (깊이 4)</td><td class="num">0.444</td><td class="num">0.305</td><td class="num">−0.14</td></tr>
+        <tr><td>4</td><td>혜원님 스태킹 (XGB 요약특성 + TF-IDF SVC + ExtraTrees → 로지스틱, 계층 후처리; test-fit 2곳 수정판)</td><td class="num">0.341</td><td class="num">0.253</td><td class="num">−0.09</td></tr>
+      </tbody>
+    </table></div>
+    <p><b>읽는 법:</b> 네 모델 전부 CV보다 0.08~0.14 낮습니다 → 공통 원인은 <b>test가 train과 조금 다르다</b>(분포 차이). 그 위에 우리 E8은 0.05가 더 떨어집니다 → 우리 특성 중 train에만 맞는 것이 있음. 가장 의심되는 것은 우리만 쓰는 <b>드라이버 2채널 314열</b>(희소 열이라 그룹 CV로도 안 잡히는 과적합 가능).</p>
+    <p><b>내일(토) 제출 계획:</b> ① E7(6그룹·경로 제외) ② E8 − 드라이버 2채널 ③ AI 노트북 특성 + 우리 설정 ④ 결과 보고 결정. 이렇게 하면 "어느 특성이 test에 안 맞는지"가 토요일 안에 가려집니다. 발표에서는 이 표 자체가 "CV만 믿지 않고 원인을 가른 과정"이 됩니다.</p>
+    <p class="caption">교훈으로 기록: "CV가 오르는 것"과 "리더보드가 오르는 것"은 다를 수 있다. 앞으로 모든 실험은 CV 점수 옆에 <b>리더보드 점수</b>를 같이 적고, 하루 4회 제출은 "CV 최고"가 아니라 "원인을 가르는 실험"에 씁니다. 데이콘 "최종 저장"은 점수가 높은 파일을 선택해 둘 것.</p>
+  </div>
+  <div class="tldr"><div class="eyebrow">한 줄 요약</div><p>강사님이 강조한 "전처리와 자료조사"는 이미 상당 부분 되어 있습니다. 지금 할 일은 더 조사하는 게 아니라, 조사한 걸 각자 맡아 <b>실험으로 검증</b>하는 것입니다. "논문에서 가져온 아이디어가 우리 데이터에서 실제로 효과가 있었나"가 발표의 본체입니다.</p></div>
+
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>한 것</th><th>남은 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>실험 현황</b></td><td>E0 0.305 → <b>E8 0.450</b> (그룹 5-fold, ±0.008). E8 = 0/1 + 변이 수·유형 + 치환 12패턴 + 아미노산 6그룹 전이 + 드라이버 2채널 + 경로 10개. 첫 제출 <code>1106_E8_cv0.450.csv</code> → <b>리더보드 0.307</b>, 팀원 AI 노트북 0.354 (4회 제출 모두 CV보다 0.08~0.14 낮음 → test 분포 차이 + 우리 특성 과적합 의심, 토요일 제출로 가름). 확인된 함정: test 빈칸 237개, STES 예측 쏠림</td><td>팀원은 <code>notebooks/00_team_baseline_E8.ipynb</code>로 0.44–0.46 재현 확인 후 PART 3에 자기 특성 추가</td></tr>
+      <tr><td><b>자료조사</b></td><td>변이 기반 논문 7편 원문 확인 (DeepGene · mClass · Soh · CPEM · Jiao · OncoNPC · 숙명여대 2024), 유전자 참조 목록 5개 CSV, 숙지사항 13, 아형별 어려운 이유, 치료 연결 근거(국내 임상 연구 2편 포함), 비교 불가 연구 검증</td><td>팀원이 숙지사항 13을 <b>읽는 것</b>. 추가 조사는 실험 중 필요할 때 프롬프트 섹션으로</td></tr>
+      <tr><td><b>전처리</b></td><td>P1–P5 실험 완료, 베이스라인 0.305 → E5 0.380. 침묵 변이 제거는 손해라는 것 확인</td><td>파생변수 Top 8을 <b>실제로 만들어 CV로 검증</b>. 이게 오늘 오후의 일</td></tr>
+      <tr><td><b>협업 준비</b></td><td>팀 가이드(이 페이지), 제출 체크리스트, 조사 프롬프트</td><td>GitHub 팀 레포 생성, 노션 Experiment Log 표, 역할 분담</td></tr>
+    </tbody>
+  </table></div>
+
+  <p class="caption">전체 일정과 역할표는 <a href="#plan">일정</a> 섹션에, 실험 숫자는 <a href="#exp">실험 기록</a>에 있습니다.</p>
+</section>
+
+<!-- ================= MUSTS ================= -->
+<section id="musts">
+  <div class="sec-head"><div class="eyebrow">시작 전 필독</div><h2>숙지사항 13</h2></div>
+  <div class="tldr"><div class="eyebrow">왜 이것부터</div><p>강사님 말씀: "점수를 쥐어짜기 전에 이 데이터를 어떻게 다뤄야 하는지, 주의할 점과 현재 연구 수준을 먼저 알아야 한다. 올라갈 수 있는 수치는 정해져 있고, 그 이유를 명확히 알아야 한다." 아래 13가지가 그 내용입니다. 각 항목의 근거는 페이지 아래 섹션에 있습니다.</p></div>
+  <ol class="rules">
+    <li><div><b>기대 범위는 정확도 50% 전후, Macro F1은 그보다 낮다</b><span>점 돌연변이만 쓴 선행 연구는 49–65%. 80% 이상은 복제수 변이나 전장 유전체를 쓴 경우뿐입니다. 우리 데이터에는 그 정보가 없습니다.</span></div></li>
+    <li><div><b>KIPAN⊇KIRC, GBMLGG⊇LGG — 같은 환자가 두 라벨로 두 번 들어 있다 (데이터로 확인)</b><span>변이 프로필이 완전히 같은 환자 쌍이 445쌍이고, 그중 KIPAN↔KIRC 272쌍, GBMLGG↔LGG 173쌍 (변이 유전자 중앙값 10.5개, 최대 121개 — 우연일 수 없음). Broad Firehose 정의상 KIPAN = KICH+KIRC+KIRP, GBMLGG = GBM+LGG, STES = STAD+ESCA라 하위 코호트가 통합 코호트에 다시 들어갑니다. 이 환자들은 정답이 둘이라 구조적으로 맞힐 수 없습니다.</span></div></li>
+    <li><div><b>교차검증은 프로필 단위로 묶어서 (StratifiedGroupKFold)</b><span>같은 프로필 두 개가 학습 fold와 검증 fold에 나뉘면 모델이 외워서 맞혀 점수가 부풀림. 내부 검증 점수가 리더보드보다 크게 높게 나오는 전형적 원인. 같은 프로필은 같은 fold에 넣는다.</span></div></li>
+    <li><div><b>변이가 0개인 환자 94명은 맞힐 단서가 없다</b><span>입력이 전부 WT (THYM 30 · THCA 18 · LAML 12 …). Soh 2017은 이런 샘플을 아예 제외했습니다. 우리는 제외할 수 없으니 별도로 분석해 보고합니다.</span></div></li>
+    <li><div><b>침묵 변이는 지우지 않는다</b><span>우리 실험(E3)에서 제거하자 하락. 변이를 일으킨 원인(흡연·자외선 등)의 흔적이 담겨 있기 때문입니다 (Jiao 2020).</span></div></li>
+    <li><div><b>가장 큰 개선은 "환자 단위 요약 변수"에서 나온다</b><span>변이 수·변이 종류 비율·변이 패턴. 논문(CPEM)에서도 우리 실험(E6a +0.024, 6그룹 전이 +0.020)에서도 확인. 유전자 열을 전부 빼고 요약 변수 407열만 써도 CV 0.404 — 점수의 대부분이 여기서 나옵니다.</span></div></li>
+    <li><div><b>서로 닮은 암끼리는 헷갈릴 수밖에 없다</b><span>LUAD↔LUSC(둘 다 흡연), CESC(HPV 원인이라 변이에 안 보임), SARC·PRAD(복제수·융합 주도), PAAD(종양 순도 낮아 변이 누락), THYM(핵심 유전자 GTF2I가 열에 없음). 원인을 아형별로 설명하는 것이 "데이터 해석" 점수입니다.</span></div></li>
+    <li><div><b>Leakage는 test뿐 아니라 fold 안에서도 생긴다</b><span>특성 선택, 타깃 인코딩, 증강, 분위수 기준, TF-IDF 어휘, 스케일러 평균은 교차검증 fold 안 train으로만 계산. 팀원 코드 리뷰에서 TF-IDF·StandardScaler를 train+test에 fit한 곳 2곳을 고쳤습니다. 이 대회 데이터로 쓴 학회 논문이 노이즈 증강 후 0.34 → 0.80을 보고했지만, 교차검증·시드·설정값이 없어 재현할 수 없고 리더보드 점수도 아닙니다.</span></div></li>
+    <li><div><b>과거 대회 코드는 열어보지도 않는다</b><span>유사도 90% 이상이면 순위 제외. 논문의 아이디어만 참고하고 코드는 직접 씁니다.</span></div></li>
+    <li><div><b>논문 지식은 써도 되지만 외부 데이터는 안 된다</b><span>신호경로·핫스팟·긴 유전자 목록을 논문에서 가져와 특성을 설계하는 것은 OK (출처 기재, <code>refs/</code>). 다른 환자 데이터를 학습에 쓰는 것은 규정 위반. 데이콘 데이터는 재배포 금지라 <b>레포에 data를 올리지 않습니다</b>(공개 레포).</span></div></li>
+    <li><div><b>test.csv에만 빈칸(NaN)이 237개 있다 — 코드가 여기서 죽는다</b><span>train은 결측 0인데 test는 환자 128명 · 유전자 25개(CNOT2 77 · AK2 29 · MYL1 21 · RBM5 19 …)에 빈칸이 있습니다. 빈칸 환자는 변이 수가 많은 편(60–1,111개). 우리 기준: <b>빈칸 = 정보 없음 = WT로 채움</b> (<code>features.fill_missing</code>, 읽자마자 적용). train으로 학습만 하고 test는 보지 않았다면 제출 직전에 터집니다 — 제출 체크리스트에 포함.</span></div></li>
+    <li><div><b>예측 분포를 확인하고 제출한다 — STES로 쏠림</b><span>E8 모델의 test 예측은 STES 16.7%(train 6.1%), COAD 8.4%(3.6%), BRCA 6.1%(12.7%). 클래스 가중치를 빼도 STES 22%라 가중치 탓이 아닙니다. 변이가 많은 환자를 STES로 묶어 보내는 것으로 추정(test에 실제로 STES가 많을 가능성도 있음). 제출 전 분포 표를 뽑습니다. 아형별 임계값 보정(Top8 ⑧)은 중첩 검증에서 하락(0.434→0.426)이라 기각.</span></div></li>
+    <li><div><b>CV가 올라도 리더보드는 내려갈 수 있다 — 첫 제출에서 확인 (CV 0.450 → 리더보드 0.307)</b><span>네 모델 모두 CV보다 0.08~0.14 낮았습니다(test 분포 차이). 설정만 바꿔도 리더보드는 그대로(0.305)라 원인은 특성 쪽. 실험 기록에는 CV와 리더보드를 나란히 적고, 두 점수가 0.1 이상 벌어지면 특성을 줄이거나 규제를 늘립니다. 제출 4회는 "원인을 가르는 실험"에 씁니다.</span></div></li>
+  </ol>
+</section>
+
+<!-- ================= STRATEGY ================= -->
+<section id="strategy">
+  <div class="sec-head"><div class="eyebrow">01 · 팀 전략</div><h2>OT에서 강사님이 찍어준 포인트와 우리의 대응</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:11rem">강사님 포인트</th><th>우리의 대응</th></tr></thead>
+    <tbody>
+      <tr><td><b>접근 과정이 점수보다 중요</b></td><td>실험 ID(E0…)마다 가설 → 결과 → 해석을 기록. 기각된 실험(E3 침묵 변이 제거, E8a 중복 토큰, 임계값 보정, 계층 후처리)도 발표에 넣는다 — "해봤고 안 됐다"가 과정이다.</td></tr>
+      <tr><td><b>경량화 모델</b></td><td>유전자 열 0 · 100 · 300 · 1,000 · 전부 비교표(CV 0.404 → 0.431). 상위 300 + 요약 특성 707열이면 −0.015. "유전자 패널 300개 검사로도 된다"는 서비스 이야기로 연결.</td></tr>
+      <tr><td><b>논문·자료조사가 핵심</b></td><td>변이 기반 분류 논문 10편 원문 확인 + 국내 임상 연구 2편. 각 논문에서 "무엇을 참조하고 무엇은 참조하면 안 되는지"를 구분(논문 상세 섹션). 유전자 목록은 <code>refs/</code>에 출처와 함께.</td></tr>
+      <tr><td><b>60%를 넘기 어렵다</b></td><td>왜 어려운지 데이터 구조로 설명: 겹치는 라벨 445쌍, 변이 0 환자 94명, KRAS 등 핵심 유전자 누락, 복제수·발현 정보 없음. 선행 연구 천장(49–65%)과 같은 선.</td></tr>
+      <tr><td><b>정밀 의료 · 맞춤형 치료 제시</b></td><td>아형 예측 → OncoKB 등급(암종별) → 치료 후보 시나리오. 국내 2026 연구(삼성서울병원 SCLC, 분당차병원 HCC)로 "분자 아형이 치료 반응을 가른다"는 근거.</td></tr>
+      <tr><td><b>매일 기록 · Git/노션 협업</b></td><td>레포 <code>logs/experiments.md</code>(실험) + <code>logs/daily.md</code>(일일) + 이 가이드의 진행 일지. 브랜치 → PR → 리뷰 → 머지 (명석님 PR #1로 흐름 검증 완료).</td></tr>
+      <tr><td><b>GPU 없음</b></td><td>트리 모델·선형 모델 중심. MLP는 작게. Colab CPU 기준 E8 5-fold 20~30분.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>시도 중복 방지 — 누가 무엇을</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>영역</th><th>담당</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>전처리 P1–P5, 파생변수 ①②④⑤, 경량화, 임계값</td><td>태은</td><td>완료 (E0→E8, 경량화 표, ⑧ 기각)</td></tr>
+      <tr><td>치환 20×20 + 경로 7 + 규제 XGB (AI 노트북)</td><td>명석</td><td>리더보드 0.354 (현재 최고). 레포 <code>notebooks/01myeongseok.ipynb</code></td></tr>
+      <tr><td>스태킹(XGB + TF-IDF SVC + ExtraTrees) + 계층 후처리</td><td>혜원</td><td>CV 0.341 · 리더보드 0.253. 다음: XGB에 0/1 행렬 추가</td></tr>
+      <tr><td>③ 핫스팟</td><td>명석 (월)</td><td><code>refs/hotspots_chang2016.csv</code></td></tr>
+      <tr><td>⑥ 긴 유전자 보정(FLAGS) · ⑦ 과돌연변이·MMR/POLE</td><td>민준 (월)</td><td><code>refs/flags_shyr2014.csv</code>, <code>refs/mmr_pole_genes.csv</code></td></tr>
+      <tr><td>모델 5종 비교</td><td>태은 (일)</td><td>진행 중</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Git · 노션 · 디스코드</h3>
+  <div class="tbl"><table>
+    <tbody>
+      <tr><td style="width:11rem"><b>코드</b></td><td><a href="https://github.com/ten-infosec/dacon-cancer-subtype-oz-team7">GitHub 레포</a>. 각자 브랜치 <code>feat/이름-주제</code> → PR → 팀장 리뷰 → 머지. main 직접 push 금지. 순서는 <code>docs/git_guide.md</code>.</td></tr>
+      <tr><td><b>데이터 경로</b></td><td>레포 안 <code>data/</code>(git 무시)에 각자 넣기. 코드에는 개인 경로를 쓰지 않고 공통 경로 셀(<code>data/</code> → <code>../data</code> → Drive <code>dacon_cancer</code> → <code>/data</code> 순서로 자동 탐색)을 쓴다. 이렇게 하면 경로 때문에 충돌이 나지 않는다.</td></tr>
+      <tr><td><b>제출</b></td><td>팀장만. 하루 4회는 팀 공용. 파일명 <code>{월일}_{실험ID}_cv{점수}.csv</code>, 레포 <code>submissions/</code>에 보관.</td></tr>
+      <tr><td><b>대화</b></td><td><a href="https://discord.com/invite/7kNFqKrXX">팀 디스코드</a> (주말 포함). 실험 결과는 <code>logs/experiments.md</code>에 한 줄씩. 이 페이지는 그 기록을 모아 보는 요약본.</td></tr>
+      <tr><td><b>제출 서류</b></td><td>노션 7조 페이지에 GitHub 레포 링크(칸 하나만)와 PPT. 코드는 팀장이 조교 디스코드 DM.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= QA ================= -->
+<section id="qa">
+  <div class="sec-head"><div class="eyebrow">02 · OT Q&amp;A</div><h2>OT에서 나온 질문과 답, 그리고 우리의 해석</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:12rem">질문</th><th>답변 (OT)</th><th>우리의 해석 · 결정</th></tr></thead>
+    <tbody>
+      <tr><td>외부 데이터를 써도 되나</td><td>구두로는 "참고 가능" 취지의 답변이 있었음</td><td>서면 규정은 <b>외부 데이터 금지</b>. 서면과 구두가 다르면 서면을 따른다 → 외부 환자 데이터는 학습에 쓰지 않음. 논문의 유전자 목록(지식)은 사용 가능.</td></tr>
+      <tr><td>생성형 AI를 써도 되나</td><td>허용. 다만 코드는 이해하고 설명할 수 있어야 함</td><td>AI는 조사·코드 초안·검토에 사용, 검증과 결정은 팀. AI가 낸 수치·논문은 원문 확인 후에만 가이드에 넣는다(지어낸 논문 1건 적발). 커밋에 AI 협업 표기.</td></tr>
+      <tr><td>GPU가 있나</td><td>없음 (Colab CPU)</td><td>트리·선형 모델 중심. 딥러닝은 작은 MLP만 비교용.</td></tr>
+      <tr><td>평가 방식</td><td>리더보드 90% + 동료 발표 평가 10%. 동점이면 운영진 평가(데이터 해석)</td><td>발표 10%는 연습량에 비례. "왜 이 점수인가"를 아형별로 설명할 수 있어야 동점 기준에서 이긴다.</td></tr>
+      <tr><td>정확도 몇 %가 가능한가</td><td>60%를 넘기 어렵다</td><td>선행 연구 천장과 일치. 목표는 "천장 근처 + 이유 설명".</td></tr>
+      <tr><td>코드 제출 형식</td><td>단일 .ipynb, 경로 <code>/data</code>, 재현 가능(SEED·하이퍼파라미터 기재), 팀장이 조교 DM</td><td>화요일 최종 확정 후 <code>features.py</code> 내용을 노트북 안에 붙인 독립 실행본을 만든다. 새 런타임에서 재실행해 제출 파일과 동일한지 확인.</td></tr>
+      <tr><td>조교 추가 안내</td><td>리더보드 마감(11/13 11:50) 스크린샷은 조교가 찍음. 노션 7조 페이지엔 레포 링크 칸 하나. 과거 대회 코드 유사도 90% 이상 시 순위 제외</td><td>제출 체크리스트에 반영.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= RULES ================= -->
+<section id="rules">
+  <div class="sec-head"><div class="eyebrow">03 · 팀 원칙</div><h2>5원칙 · 운영 규칙 · Leakage 자가점검</h2></div>
+  <ol class="rules">
+    <li><div><b>공개 코드는 보지 않고 코드는 직접 쓴다</b><span>과거 대회 코드 유사도 90% 이상이면 순위 제외. 논문의 아이디어만.</span></div></li>
+    <li><div><b>test.csv는 예측할 때만 연다</b><span>EDA · fit 모두 train만. 형식 확인(빈칸)은 예외로 하되 분포는 보지 않는다.</span></div></li>
+    <li><div><b>외부 데이터 금지, 지식은 가능</b><span>논문 유전자 목록은 <code>refs/</code>에 출처와 함께. 환자 데이터는 금지.</span></div></li>
+    <li><div><b>SEED = 42 고정, 최종 하이퍼파라미터는 숫자로 코드에</b><span>재현 불가 코드는 제출 불가.</span></div></li>
+    <li><div><b>실험마다 기록</b><span>담당 · 가설 · CV · 리더보드 · 해석 한 줄. 기각도 기록.</span></div></li>
+  </ol>
+
+  <h3>운영 규칙 상세</h3>
+  <div class="tbl"><table>
+    <tbody>
+      <tr><td style="width:11rem"><b>검증</b></td><td>검증은 항상 같은 5-fold (<code>StratifiedGroupKFold(5, shuffle=True, random_state=42)</code>, groups = 프로필 해시). 다른 분할로 난 점수는 비교 불가 — 팀원 간 점수를 비교하려면 시험지가 같아야 함. 점수는 "평균 ± 표준편차"로 적는다.</td></tr>
+      <tr><td><b>채택 기준</b></td><td>CV +0.01 이상이고 표준편차 안에서 설명 가능할 때 채택. 리더보드와 0.1 이상 벌어지면 채택 보류. 11.11 이후 모델 변경은 리더보드 +0.01 이상만.</td></tr>
+      <tr><td><b>제출</b></td><td>팀장만, 하루 4회 공용. 제출 전 예측 분포 표 확인. 데이콘 "최종 저장"은 점수 높은 파일로.</td></tr>
+      <tr><td><b>기록</b></td><td><code>logs/experiments.md</code>(실험 한 줄) · <code>logs/daily.md</code>(오늘 한 것 / 결과 / 내일) · 가이드 진행 일지(팀장).</td></tr>
+      <tr><td><b>코드 스타일</b></td><td>열 이름은 영문·숫자·_만(LightGBM 호환). 구역 주석은 영어. 노트북은 "제목 주석 → 코드 → 해석 주석" 구조.</td></tr>
+      <tr><td><b>회의</b></td><td>월·화 10:00 디스코드 10분 스탠드업: 어제 한 것 · 오늘 할 것 · 막힌 것.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Leakage 자가점검 7 — PR 올리기 전에</h3>
+  <ul class="check">
+    <li><label><input type="checkbox" id="l1">test.csv로 <code>fit</code>, <code>fit_transform</code>, 통계(평균·빈도·어휘)를 계산한 곳이 없다</label></li>
+    <li><label><input type="checkbox" id="l2">특성 선택·유전자 빈도 필터는 fold 안 train으로만 계산했다</label></li>
+    <li><label><input type="checkbox" id="l3">스케일러·TF-IDF·NMF·PCA는 train(fold)에만 fit하고 검증/test는 transform만 했다</label></li>
+    <li><label><input type="checkbox" id="l4">증강·오버샘플링은 분할 뒤 train 쪽에만 했다</label></li>
+    <li><label><input type="checkbox" id="l5">교차검증은 StratifiedGroupKFold(프로필 해시)다</label></li>
+    <li><label><input type="checkbox" id="l6">메타 모델(스태킹)은 OOF로만 학습했고, 학습한 행을 채점에 쓰지 않았다</label></li>
+    <li><label><input type="checkbox" id="l7">ID · SUBCLASS가 입력 특성에 들어가지 않았다 (train/test 열 집합이 같다)</label></li>
+  </ul>
+</section>
+
+<!-- ================= DATA ================= -->
+<section id="data">
+  <div class="sec-head"><div class="eyebrow">03 · 데이터 이해</div><h2>train.csv를 읽는 법</h2></div>
+  <div class="tldr"><div class="eyebrow">한 줄 요약</div><p>환자 한 명 = 한 줄. 6,201명 × (ID + 정답 + 유전자 4,384개). 각 유전자 칸은 정상이면 <code>WT</code>, 변이가 있으면 "어떻게 바뀌었는지"의 표기. test는 2,546명, 정답 없음. 발현량·복제수·나이·성별은 없다.</p></div>
+
+  <h3>표본 (실제 행 발췌)</h3>
+  <div class="specimen"><table>
+    <thead><tr><th>ID</th><th>SUBCLASS</th><th>TP53</th><th>BRAF</th><th>IDH1</th><th>APC</th><th>KMT2D</th><th>…</th></tr></thead>
+    <tbody>
+      <tr><td>TRAIN_0001</td><td>LGG</td><td class="wt">WT</td><td class="wt">WT</td><td class="mut">R132H</td><td class="wt">WT</td><td class="wt">WT</td><td class="wt">…</td></tr>
+      <tr><td>TRAIN_0002</td><td>COAD</td><td class="mut">R273H</td><td class="wt">WT</td><td class="wt">WT</td><td class="mut">R1450* E1309fs</td><td class="mut">P2354L</td><td class="wt">…</td></tr>
+      <tr><td>TRAIN_0003</td><td>SKCM</td><td class="wt">WT</td><td class="mut">V600E</td><td class="wt">WT</td><td class="wt">WT</td><td class="mut">S1180S R2088Q</td><td class="wt">…</td></tr>
+      <tr><td>TRAIN_0004</td><td>THYM</td><td class="wt">WT</td><td class="wt">WT</td><td class="wt">WT</td><td class="wt">WT</td><td class="wt">WT</td><td class="wt">…</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">예시 조합입니다(값은 실제 데이터에 존재하는 표기). 변이 칸 218,893개, 서로 다른 변이 문자열 118,846개 — 거의 전부 한 번씩만 나오는 희귀 표기라 문자열 자체를 외우는 모델은 작동하지 않습니다.</p>
+
+  <h3>컬럼 설명</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>컬럼</th><th>뜻</th><th>모델에서</th></tr></thead>
+    <tbody>
+      <tr><td><code>ID</code></td><td>환자 번호. TRAIN_0000 ~, TEST_0000 ~</td><td>입력에서 제외. 제출 파일의 키</td></tr>
+      <tr><td><code>SUBCLASS</code></td><td>정답. TCGA 코호트 약어 26개 (아래 표)</td><td>train에만 있음. LabelEncoder로 0–25</td></tr>
+      <tr><td>유전자 4,384개</td><td>열 이름 = 유전자 기호(HGNC). 값 = <code>WT</code> 또는 단백질 변이 표기(공백으로 여러 개)</td><td>0/1(변이 유무) + 표기를 읽어 만든 요약 특성</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>SUBCLASS 26개 — 무엇의 약어인가</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>코드</th><th>암</th><th class="num">train</th><th>코드</th><th>암</th><th class="num">train</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">BRCA</td><td>유방암</td><td class="num">786</td><td class="mono">LUAD</td><td>폐선암</td><td class="num">184</td></tr>
+      <tr><td class="mono">KIPAN</td><td>신장암 통합 (KICH+KIRC+KIRP)</td><td class="num">515</td><td class="mono">LUSC</td><td>폐 편평세포암</td><td class="num">178</td></tr>
+      <tr><td class="mono">GBMLGG</td><td>뇌교종 통합 (GBM+LGG)</td><td class="num">461</td><td class="mono">LIHC</td><td>간세포암</td><td class="num">158</td></tr>
+      <tr><td class="mono">STES</td><td>위·식도암 통합 (STAD+ESCA)</td><td class="num">379</td><td class="mono">LAML</td><td>급성 골수성 백혈병</td><td class="num">158</td></tr>
+      <tr><td class="mono">KIRC</td><td>신장 투명세포암</td><td class="num">334</td><td class="mono">CESC</td><td>자궁경부암</td><td class="num">155</td></tr>
+      <tr><td class="mono">THCA</td><td>갑상선암</td><td class="num">324</td><td class="mono">PCPG</td><td>갈색세포종·부신경절종</td><td class="num">147</td></tr>
+      <tr><td class="mono">SKCM</td><td>피부 흑색종</td><td class="num">276</td><td class="mono">TGCT</td><td>고환 생식세포종양</td><td class="num">124</td></tr>
+      <tr><td class="mono">PRAD</td><td>전립선암</td><td class="num">266</td><td class="mono">PAAD</td><td>췌장암</td><td class="num">120</td></tr>
+      <tr><td class="mono">OV</td><td>난소암</td><td class="num">253</td><td class="mono">BLCA</td><td>방광암</td><td class="num">104</td></tr>
+      <tr><td class="mono">LGG</td><td>저등급 뇌교종</td><td class="num">229</td><td class="mono">THYM</td><td>흉선종</td><td class="num">98</td></tr>
+      <tr><td class="mono">HNSC</td><td>두경부 편평세포암</td><td class="num">223</td><td class="mono">ACC</td><td>부신피질암</td><td class="num">72</td></tr>
+      <tr><td class="mono">COAD</td><td>결장암</td><td class="num">223</td><td class="mono">DLBC</td><td>미만성 거대 B세포 림프종</td><td class="num">38</td></tr>
+      <tr><td class="mono">SARC</td><td>육종</td><td class="num">198</td><td class="mono">UCEC</td><td>자궁내막암</td><td class="num">198</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">최다 BRCA 786 / 최소 DLBC 38 = 20.7배 불균형. KIPAN·GBMLGG·STES는 하위 코호트를 포함하는 통합 라벨(주의점 섹션).</p>
+
+  <h3>변이 표기 읽는 법</h3>
+  <div class="anatomy">
+    <div class="part"><div class="glyph a">R</div><div class="lab">원래 아미노산 (아르기닌)</div></div>
+    <div class="part"><div class="glyph n">273</div><div class="lab">단백질에서 몇 번째 자리</div></div>
+    <div class="part"><div class="glyph b">H</div><div class="lab">바뀐 아미노산 (히스티딘)</div></div>
+    <div class="part"><div class="glyph n">=</div><div class="lab"></div></div>
+    <div class="part"><div class="glyph n" style="font-size:1rem">TP53 R273H</div><div class="lab">TP53 단백질 273번 자리가 R→H로 바뀐 미스센스 변이 (암 핫스팟)</div></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>표기 예</th><th>종류</th><th>단백질에 미치는 영향</th><th class="num">train 토큰 수</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">R273H</td><td><b>미스센스</b> (글자→다른 글자)</td><td>부품 하나가 바뀜. 위치에 따라 기능 손상 정도가 다름. 가장 흔함</td><td class="num">약 160k</td></tr>
+      <tr><td class="mono">R895R</td><td><b>침묵</b> (글자→같은 글자)</td><td>DNA는 바뀌었지만 아미노산은 그대로. 변이 원인(흡연·자외선)의 흔적. 지우면 손해(E3)</td><td class="num">약 65k</td></tr>
+      <tr><td class="mono">R213*</td><td><b>정지</b> (끝이 *)</td><td>단백질이 중간에 잘림 → 대부분 기능 상실. 종양억제유전자에서 흔함</td><td class="num">약 13k</td></tr>
+      <tr><td class="mono">L1854fs</td><td><b>프레임시프트</b> (fs)</td><td>읽는 틀이 밀려 뒤가 전부 엉망 → 기능 상실. MSI 암에서 폭증</td><td class="num">약 10k</td></tr>
+      <tr><td class="mono">91_92NH&gt;KY</td><td>연속 치환</td><td>인접한 두 자리가 함께 바뀜</td><td class="num">199</td></tr>
+      <tr><td class="mono">…del</td><td>결실</td><td>일부가 빠짐</td><td class="num">3</td></tr>
+      <tr><td class="mono">WT</td><td>정상형</td><td>변이 없음. 전체 칸의 약 99.2%</td><td class="num">—</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">한 칸에 최대 64개 변이가 공백으로 나열됨. 일부 칸(3,068개, 환자 144명)은 같은 토큰이 두 번 적혀 있음(가공 흔적, BRCA·STES에 쏠림) — 특성화해도 효과 없음(E8a).</p>
+
+  <h3>아미노산 기호표 (치환 패턴을 읽을 때)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>성질 그룹</th><th>아미노산 (1문자)</th><th>E8의 "6그룹 전이"에서</th></tr></thead>
+    <tbody>
+      <tr><td>지방족 (소수성)</td><td>A 알라닌 · V 발린 · I 이소류신 · L 류신 · M 메티오닌</td><td>ali</td></tr>
+      <tr><td>방향족</td><td>F 페닐알라닌 · W 트립토판 · Y 티로신</td><td>aro</td></tr>
+      <tr><td>극성 (비전하)</td><td>S 세린 · T 트레오닌 · N 아스파라긴 · Q 글루타민 · C 시스테인</td><td>pol</td></tr>
+      <tr><td>산성 (−)</td><td>D 아스파르트산 · E 글루탐산</td><td>acid</td></tr>
+      <tr><td>염기성 (+)</td><td>K 라이신 · R 아르기닌 · H 히스티딘</td><td>base</td></tr>
+      <tr><td>특수</td><td>G 글리신 · P 프롤린</td><td>spec</td></tr>
+      <tr><td>정지</td><td>* (단백질 끝)</td><td>절단형으로 분류</td></tr>
+    </tbody>
+  </table></div>
+  <p>왜 그룹으로 묶나: R→H(염기성→염기성)는 성질이 비슷해 단백질이 덜 망가지고, G→D(특수→산성)는 구조가 크게 바뀝니다. 그리고 어떤 치환이 많은지는 변이의 <b>원인</b>을 반영합니다 — 자외선은 C→T 염기 치환을 만들어 특정 아미노산 치환(예: S→F, P→L)이 늘고, 흡연은 C→A라 다른 패턴이 됩니다. 우리 데이터엔 염기 정보가 없어 아미노산 치환으로 이를 근사합니다(E6b +0.009, 6그룹 전이 +0.020).</p>
+
+  <h3>염기서열 분석 기초 — 이 데이터가 어떻게 만들어졌나</h3>
+  <div class="tbl"><table>
+    <tbody>
+      <tr><td style="width:11rem"><b>DNA → 단백질</b></td><td>DNA 염기(A·T·G·C) 3개가 한 코돈 = 아미노산 1개. 염기 하나가 바뀌면 아미노산이 바뀌거나(미스센스), 안 바뀌거나(침묵), 정지 신호가 되거나(정지). 염기 1~2개가 빠지거나 끼면 읽는 틀이 밀림(프레임시프트).</td></tr>
+      <tr><td><b>체세포 변이</b></td><td>암 조직과 정상 조직을 함께 시퀀싱해, 암에만 있는 변이를 고른 것. 부모에게 물려받은 생식세포 변이는 제외됨. 우리 데이터는 체세포 변이만.</td></tr>
+      <tr><td><b>엑솜 시퀀싱</b></td><td>단백질을 만드는 부분(엑솜, 유전체의 ~1.5%)만 읽음. TCGA가 이 방식. 그래서 유전자 밖(조절 부위, TERT 프로모터 등)의 변이는 없음.</td></tr>
+      <tr><td><b>왜 4,384개뿐인가</b></td><td>사람 유전자는 약 2만 개. 대회 측이 일부만 제공. KRAS·NRAS·TTN·MUC16·ARID1A·SMAD4·STK11·TERT·ATM·GTF2I 등 유명 유전자가 <b>없음</b>. 있는 것: TP53·PIK3CA·BRAF·IDH1·VHL·APC·PTEN·EGFR·CDKN2A·RB1·NF1·ATRX·CTNNB1·BRCA1/2·KMT2D·POLE·MLH1·FGFR3·KIT·ERBB2·HRAS.</td></tr>
+      <tr><td><b>복제수 · 발현량이 없다는 뜻</b></td><td>유전자가 몇 벌 있는지(증폭·결실), 얼마나 켜져 있는지(RNA)는 없음. 선행 연구에서 80%+를 낸 정보가 바로 이것 — 우리 천장이 낮은 핵심 이유.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= DOMAIN ================= -->
+<section id="domain">
+  <div class="sec-head"><div class="eyebrow">03-0 · 도메인 기초</div><h2>암 유전체를 읽는 데 필요한 최소 지식</h2></div>
+
+  <h3>암유전자 vs 종양억제유전자 — 변이 종류가 다르다</h3>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>암유전자 (oncogene)</th><th>종양억제유전자 (TSG)</th></tr></thead>
+    <tbody>
+      <tr><td>비유</td><td>액셀. 고장 나면 <b>계속 밟힌 상태</b></td><td>브레이크. 고장 나면 <b>안 들음</b></td></tr>
+      <tr><td>변이 모양</td><td>특정 자리에 반복되는 <b>미스센스 핫스팟</b> (BRAF V600E, IDH1 R132H, PIK3CA H1047R)</td><td>아무 데나 생기는 <b>정지·프레임시프트</b> (TP53, APC, PTEN, RB1)</td></tr>
+      <tr><td>Vogelstein 20/20 규칙</td><td>미스센스의 20% 이상이 같은 자리</td><td>변이의 20% 이상이 절단형</td></tr>
+      <tr><td>우리 특성</td><td>미스센스 채널 <code>mis_유전자</code></td><td>절단형 채널 <code>trunc_유전자</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>운전자 vs 승객 변이</h3>
+  <p><b>운전자(driver)</b>는 암을 일으킨 변이(환자당 2~8개), <b>승객(passenger)</b>은 암이 자라는 동안 우연히 쌓인 변이(수십~수천 개). 직관은 "운전자만 보면 된다"지만, Jiao 2020은 운전자만으로는 F1 0.33이고 승객의 <b>패턴</b>(어디에, 어떤 종류로 쌓였나)이 암종을 더 잘 가른다고 보고했습니다. 우리 E3(침묵 변이 제거 → 하락)과 같은 방향. 그래서 운전자 목록(Bailey 2018, 157개 겹침)은 2채널로 쓰되, 전체 변이도 버리지 않습니다.</p>
+
+  <h3>변이 원인별 흔적</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>원인</th><th>남기는 흔적</th><th>대표 암</th><th>우리 데이터에서 보이나</th></tr></thead>
+    <tbody>
+      <tr><td>자외선</td><td>C→T 치환 폭증, 변이 수 매우 많음</td><td>SKCM</td><td>변이 수 중앙값 86 — 가장 잘 보임 (F1 0.86)</td></tr>
+      <tr><td>흡연</td><td>C→A 치환, 변이 수 많음</td><td>LUAD · LUSC · BLCA · HNSC</td><td>변이 수로는 보이나 네 암끼리 구분이 어려움</td></tr>
+      <tr><td>MMR 고장 (MSI)</td><td>프레임시프트 폭증, 변이 수 수백~수천</td><td>COAD · UCEC · STAD 일부</td><td>n_fs·r_fs 특성. 과돌연변이 환자 391명</td></tr>
+      <tr><td>POLE 변이</td><td>초과돌연변이(수천 개)</td><td>UCEC · COAD 일부</td><td>최대 2,393개 환자가 이 유형일 가능성</td></tr>
+      <tr><td>APOBEC</td><td>특정 문맥의 C→T/G 치환</td><td>BLCA · CESC · BRCA</td><td>염기 문맥 없어 약하게만</td></tr>
+      <tr><td>노화</td><td>C→T (CpG), 느리게 쌓임</td><td>대부분</td><td>구분력 낮음</td></tr>
+      <tr><td>바이러스 (HPV)</td><td>변이로 안 보임 — 바이러스 단백질이 TP53·RB1을 끔</td><td>CESC · HNSC 일부</td><td>TP53 변이가 <b>없는 것</b>이 오히려 신호</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>주요 유전자 13개 — 열에 있는 것 위주</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>유전자</th><th>역할</th><th>변이 비율 높은 아형 (train)</th><th>읽을 때</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">TP53</td><td>TSG. "유전체의 수호자"</td><td>OV 75% · LUSC 71% · HNSC 66% (전체 1,770명)</td><td>너무 많은 암에 있어 "어느 암"은 못 가름. R273·R248·R175 핫스팟</td></tr>
+      <tr><td class="mono">IDH1</td><td>대사 효소. R132H 핫스팟</td><td>LGG 79% · GBMLGG 41%</td><td>뇌교종의 지문. LAML에도 11%</td></tr>
+      <tr><td class="mono">APC</td><td>TSG (WNT 경로)</td><td>COAD 72%</td><td>대장암의 지문. 절단형이 대부분</td></tr>
+      <tr><td class="mono">VHL</td><td>TSG (저산소 반응)</td><td>KIRC 45% · KIPAN 30%</td><td>신장 투명세포암의 지문</td></tr>
+      <tr><td class="mono">BRAF</td><td>암유전자 (MAPK). V600E</td><td>THCA 57% · SKCM 50%</td><td>갑상선·흑색종 둘 다 → 둘 구분엔 부족. 치료 근거는 암종별로 다름(OncoKB)</td></tr>
+      <tr><td class="mono">PIK3CA</td><td>암유전자 (PI3K). E545K·H1047R</td><td>UCEC 49% · BRCA 32% · CESC 23%</td><td>여성암에 많음</td></tr>
+      <tr><td class="mono">PTEN</td><td>TSG (PI3K 브레이크)</td><td>UCEC 62% · GBMLGG 16%</td><td>자궁내막암의 지문</td></tr>
+      <tr><td class="mono">CTNNB1</td><td>암유전자 (WNT)</td><td>LIHC · UCEC · ACC</td><td>S33·S37·S45 핫스팟</td></tr>
+      <tr><td class="mono">NFE2L2</td><td>암유전자 (산화 스트레스)</td><td>LUSC 15%</td><td>편평세포암 쪽 신호</td></tr>
+      <tr><td class="mono">FGFR3</td><td>암유전자 (RTK)</td><td>BLCA 15%</td><td>방광암 신호. S249C 핫스팟</td></tr>
+      <tr><td class="mono">POLE · MLH1</td><td>DNA 복제·수리</td><td>UCEC · COAD 일부</td><td>고장 나면 과돌연변이</td></tr>
+      <tr><td class="mono">GATA3</td><td>전사인자</td><td>BRCA 7%</td><td>유방암 특이. 비율은 낮음</td></tr>
+      <tr><td class="mono">HRAS</td><td>암유전자 (RAS) — KRAS·NRAS는 열에 없음</td><td>HNSC · BLCA · THCA 일부</td><td>RAS 계열 중 유일하게 있음</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">RYR2 · SYNE1 · PCLO · RYR1 · SPTA1은 변이 빈도 상위지만 단순히 유전자가 <b>길어서</b> 자주 맞는 것(FLAGS, Shyr 2014). 암종 신호는 약함 → ⑥ 긴 유전자 보정.</p>
+
+  <h3>조직 계통으로 묶어 보기 — 헷갈리는 짝</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>계통</th><th>아형</th><th>왜 헷갈리나</th></tr></thead>
+    <tbody>
+      <tr><td>편평세포암</td><td>LUSC · HNSC · CESC · BLCA 일부</td><td>같은 세포 기원, TP53·CDKN2A·NFE2L2 공유</td></tr>
+      <tr><td>폐</td><td>LUAD ↔ LUSC</td><td>둘 다 흡연. KRAS가 없어 선암 신호 약함</td></tr>
+      <tr><td>신장</td><td>KIPAN ⊇ KIRC</td><td>같은 환자가 두 라벨. 구조적 오차</td></tr>
+      <tr><td>뇌</td><td>GBMLGG ⊇ LGG</td><td>같은 환자가 두 라벨. IDH1·ATRX 공유</td></tr>
+      <tr><td>소화기</td><td>STES · COAD · PAAD · LIHC</td><td>TP53·APC·(KRAS) 공유. PAAD는 순도 낮음</td></tr>
+      <tr><td>여성 생식기</td><td>BRCA · OV · UCEC · CESC</td><td>PIK3CA·TP53 공유. UCEC는 PTEN으로 구분</td></tr>
+      <tr><td>변이 적은 암</td><td>THYM · LAML · PCPG · THCA · PRAD</td><td>단서 자체가 적음. 변이 0 환자 94명 대부분 여기</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>논문 읽는 법 5가지 — 수치를 그대로 믿지 않기</h3>
+  <ol class="rules">
+    <li><div><b>입력이 무엇인가</b><span>점 돌연변이만? 복제수·발현·전장 유전체 포함? 입력이 다르면 수치 비교 불가 (발현량 논문 95%는 우리와 무관).</span></div></li>
+    <li><div><b>클래스 수와 지표</b><span>5개 정확도 99%와 26개 Macro F1은 비교 불가. 정확도는 다수 클래스에 유리, Macro F1은 소수 클래스에 엄격.</span></div></li>
+    <li><div><b>검증 방식</b><span>교차검증인가, 단일 분할인가, 외부 코호트인가. 외부 검증에서는 크게 떨어짐(TumorTracer 66.6 → 46%).</span></div></li>
+    <li><div><b>재현 정보</b><span>시드·하이퍼파라미터·코드가 있나. 없으면 "보고된 수치"로만 인용.</span></div></li>
+    <li><div><b>우리가 가져갈 것은 아이디어</b><span>수치가 아니라 "어떤 특성이 왜 효과 있었나". 그걸 우리 데이터로 검증한 결과가 발표의 본체.</span></div></li>
+  </ol>
+</section>
+
+<!-- ================= EDA ================= -->
+<section id="eda">
+  <div class="sec-head"><div class="eyebrow">03-2 · EDA</div><h2>train만 본 결과 — 발견 6가지</h2></div>
+  <div class="charts">
+    <div class="chart"><div class="eyebrow">아형별 환자 수 (train)</div><div class="bars" id="bars-count"></div><div class="legend"><span><i style="background:var(--primary)"></i>150명 이상</span><span><i style="background:var(--accent)"></i>150명 미만 (소수 아형)</span></div></div>
+    <div class="chart"><div class="eyebrow">아형별 변이 유전자 수 중앙값</div><div class="bars" id="bars-mut"></div><div class="legend"><span>SKCM 86 ~ THYM 2. 흡연·자외선 암이 많고 혈액·내분비 암이 적음</span></div></div>
+  </div>
+  <ol class="rules">
+    <li><div><b>불균형 20.7배</b><span>BRCA 786 vs DLBC 38. 클래스 가중치(E2 +0.022) 필수. DLBC는 fold당 7명이라 점수가 크게 흔들림.</span></div></li>
+    <li><div><b>극단적 희소성</b><span>전체 칸의 99.2%가 WT. 유전자 4,384개 중 train에서 한 번도 변이가 없는 열 154개 → 제거(P2).</span></div></li>
+    <li><div><b>변이 문자열 118,846종</b><span>거의 전부 한 번씩. 문자열 → 번호(베이스라인)는 의미 없는 순서를 부여 → 0/1로 바꾸자 상승(E1).</span></div></li>
+    <li><div><b>변이 수가 아형을 반쯤 가른다</b><span>중앙값 SKCM 86 · LUSC 57 · BLCA 54 vs THYM 2 · LAML 3 · PCPG 4. n_mut 한 열로 +0.03 (E4/E5). 변이 0 환자 94명, 100개 이상 391명, 최대 2,393개.</span></div></li>
+    <li><div><b>프로필 완전 동일 쌍 445</b><span>KIPAN↔KIRC 272, GBMLGG↔LGG 173. 통합 코호트 정의 그대로. 그룹 CV로 점검하니 부풀림은 없었음(E5 0.380 vs E5g 0.384).</span></div></li>
+    <li><div><b>지문 유전자</b><span>IDH1→LGG 79%, APC→COAD 72%, VHL→KIRC 45%, PTEN→UCEC 62%, BRAF→THCA 57%/SKCM 50%. TP53은 1,770명으로 가장 흔하지만 암종 구분력은 낮음.</span></div></li>
+  </ol>
+</section>
+
+<!-- ================= CAUTION ================= -->
+<section id="caution">
+  <div class="sec-head"><div class="eyebrow">03-1 · 도메인 주의점</div><h2>이 데이터를 다룰 때 염두에 둘 것</h2></div>
+  <div class="tldr"><div class="eyebrow">한 줄 요약</div><p>점수가 낮은 이유는 모델보다 데이터 구조에 있습니다. 라벨이 겹치고, 점 돌연변이만으로는 정보가 부족하고, 변이가 너무 적거나 너무 많은 환자가 섞여 있습니다.</p></div>
+
+  <h3>겹치는 라벨 (Broad GDAC Firehose 공식 정의)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>통합 라벨</th><th>구성</th><th>우리 데이터에서</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">KIPAN</td><td>KICH + KIRC + KIRP (신장암 전체)</td><td>KIRC와 프로필 동일 272쌍. KIPAN F1 0.34, KIRC 0.45</td></tr>
+      <tr><td class="mono">GBMLGG</td><td>GBM + LGG (뇌교종 전체)</td><td>LGG와 동일 173쌍. GBMLGG 0.39, LGG 0.55</td></tr>
+      <tr><td class="mono">STES</td><td>STAD + ESCA (위 + 식도)</td><td>하위 라벨이 데이터에 없어 중복은 없음. 다만 예측이 STES로 쏠림</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>주의점 표</h3>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:11rem">항목</th><th>내용</th><th>대응</th></tr></thead>
+    <tbody>
+      <tr><td><b>중복 환자 (통합 코호트)</b></td><td>프로필이 완전히 같은 쌍 445: KIPAN↔KIRC 272, GBMLGG↔LGG 173. 정답이 둘인 입력. 변이 0인 94명도 하나의 프로필(THYM 30·THCA 18·LAML 12 등)</td><td>그룹 CV로 정직한 점수 측정. 발표에서 "모델 한계가 아니라 데이터 구조"로 설명. 계층 후처리(KIPAN→KIRC)는 OOF −0.005로 기각</td></tr>
+      <tr><td><b>한 칸에 같은 변이가 두 번 적힘</b></td><td>예: <code>P307S T163T P307S T163T</code>. 변이 칸 218,893개 중 3,068칸, 환자 144명 — BRCA 56 · STES 42 · THCA 18 · CESC 10에 쏠림</td><td>생물학이 아니라 가공 흔적. "중복 토큰 수"를 특성으로 넣어 봤으나 효과 없음(E8a). 변이 수를 셀 때 중복을 지울지는 선택 — 우리는 그대로 셈</td></tr>
+      <tr><td><b>test에만 있는 빈칸 237개</b></td><td>환자 128명 · 유전자 25개, train은 0개. 빈칸 환자는 변이가 많은 편</td><td>WT로 채움 (<code>fill_missing</code>). 채우지 않으면 제출 코드가 오류로 멈춤</td></tr>
+      <tr><td><b>과돌연변이</b></td><td>변이 100개 이상 391명, 최대 2,393개. MSI·POLE 환자. 변이 수가 큰 환자는 모든 유전자에 변이가 있어 "지문"이 묻힘</td><td>log_n_mut, 비율 특성(r_*)으로 정규화. 이상치로 제거하지 않음(실제 환자). ⑦ MMR/POLE 특성 후보</td></tr>
+      <tr><td><b>긴 유전자 (FLAGS)</b></td><td>TTN·MUC16은 열에 없지만 RYR2·SYNE1·PCLO·RYR1·SPTA1 등이 상위. 길어서 자주 맞을 뿐</td><td>⑥ 길이 보정 (Shyr 2014 목록 30개 겹침). 민준님 월요일 과제</td></tr>
+      <tr><td><b>종양 순도</b></td><td>PAAD처럼 정상 세포가 많이 섞인 조직은 변이가 덜 검출됨 → 변이 수가 적게 보임</td><td>PAAD가 어려운 이유로 설명. 보정은 불가(순도 정보 없음)</td></tr>
+      <tr><td><b>배치 효과</b></td><td>TCGA 코호트마다 시퀀싱 시기·기관이 달라 변이 호출 기준이 조금씩 다름</td><td>코호트 간 차이의 일부는 생물학이 아닐 수 있음 — 과도한 해석 주의</td></tr>
+      <tr><td><b>핵심 유전자 누락</b></td><td>KRAS·NRAS·ARID1A·SMAD4·STK11·TERT·ATM·GTF2I·PBRM1·BAP1·SETD2 없음</td><td>PAAD(KRAS 90%+)·LUAD·THYM(GTF2I)이 어려운 이유. 발표에서 "있었다면"을 말하되 외부 데이터로 채우지 않음</td></tr>
+      <tr><td><b>test 분포 차이</b></td><td>4개 모델 모두 CV보다 0.08~0.14 낮음. test가 train과 완전히 같은 분포가 아님</td><td>CV와 리더보드를 나란히 기록. 특성을 줄이고 규제를 늘리는 방향 검토</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= PREP ================= -->
+<section id="prep">
+  <div class="sec-head"><div class="eyebrow">04 · 전처리</div><h2>P1–P5: 왜 했고, 어떻게 달라졌나</h2></div>
+  <div class="tldr"><div class="eyebrow">한 줄 요약</div><p>망막 프로젝트에서 "왜 crop·Ben Graham이 필요한가"를 설명했듯, 여기서는 "왜 0/1로 바꾸고, 왜 변이 수를 세고, 왜 침묵 변이를 지우지 않는가"를 실험 숫자로 설명합니다. 베이스라인 0.305 → E5 0.380 → E8 0.450 (그룹 5-fold).</p></div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-h"><span class="tag">P1</span><h3>변이 문자열 → 변이 유무 0/1</h3><span class="leak">Leakage 없음 · 행 단위 변환</span></div>
+      <div class="pwr">
+        <div><div class="lab">문제</div><p>베이스라인은 <code>OrdinalEncoder</code>로 118,846개 문자열에 임의 번호를 매김. "R273H = 3,502번"에는 의미가 없고, test의 새 문자열은 −1로 뭉개짐.</p></div>
+        <div><div class="lab">왜</div><p>암종 신호의 핵심은 "어느 유전자가 고장 났나"지 "정확히 어떤 글자인가"가 아님. 희귀 문자열을 외우지 못하게 정보를 줄이는 것.</p></div>
+        <div><div class="lab">결과</div><p>E0 0.305 → E1 0.316 (+0.011). 학습 시간 1/3.</p></div>
+      </div>
+      <div class="analogy">비유: 고장 난 부품 이름을 일련번호로 외우는 대신 "고장/정상" 체크리스트로 바꾼 것.</div>
+    </div>
+    <div class="step">
+      <div class="step-h"><span class="tag">P2</span><h3>train에서 변이가 한 번도 없는 유전자 제거</h3><span class="leak">fold 안 train으로만 계산</span></div>
+      <div class="pwr">
+        <div><div class="lab">문제</div><p>4,384개 중 154개는 train 전체가 WT → 모델에 정보 0.</p></div>
+        <div><div class="lab">왜</div><p>열을 줄여 과적합 여지와 시간을 줄임. test에서 그 유전자에 변이가 있어도 배운 게 없으니 어차피 못 씀.</p></div>
+        <div><div class="lab">결과</div><p>E1에 포함. 4,230열. 경량화 표: 상위 300개만 남겨도 −0.015.</p></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-h"><span class="tag">P3</span><h3>침묵 변이 제거 — <b>기각</b></h3><span class="leak">행 단위</span></div>
+      <div class="pwr">
+        <div><div class="lab">가설</div><p>R895R처럼 아미노산이 안 바뀐 변이는 기능 영향이 없으니 노이즈일 것.</p></div>
+        <div><div class="lab">결과</div><p>E2 0.338 → E3 0.332 (<b>−0.006</b>). 침묵 변이에도 "변이 원인"의 흔적이 있음(Jiao 2020: 승객 패턴에 신호).</p></div>
+        <div><div class="lab">교훈</div><p>생물학적으로 그럴듯한 가설도 데이터로 확인. 기각된 실험도 발표 재료.</p></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-h"><span class="tag">P4</span><h3>환자당 변이 수 (n_mut)</h3><span class="leak">행 단위</span></div>
+      <div class="pwr">
+        <div><div class="lab">왜</div><p>EDA 발견 4: 변이 수 중앙값이 SKCM 86 ~ THYM 2. 흡연·자외선·MSI 암은 많고 혈액·내분비 암은 적음. 0/1 행렬만으로는 트리가 이걸 세기 어려움.</p></div>
+        <div><div class="lab">결과</div><p>E2 0.338 → E5 0.380 (<b>+0.042</b>, 한 열). CPEM 논문에서도 변이율이 중요도 상위.</p></div>
+        <div><div class="lab">확장</div><p>E6a: 유형별 개수·비율(침묵/미스센스/정지/fs) +0.024. 6그룹 전이 +0.020. 요약 특성 407열만으로 0.404.</p></div>
+      </div>
+      <div class="analogy">비유: 체크리스트에서 "고장 난 부품이 몇 개냐"를 따로 적는 것. 차종(암종)마다 고장 개수 패턴이 다르다.</div>
+    </div>
+    <div class="step">
+      <div class="step-h"><span class="tag">P5</span><h3>클래스 가중치 (balanced)</h3><span class="leak">train 라벨 비율만 사용</span></div>
+      <div class="pwr">
+        <div><div class="lab">왜</div><p>Macro F1은 DLBC(38명)도 BRCA(786명)와 같은 비중. 가중치 없이는 모델이 큰 아형만 챙김.</p></div>
+        <div><div class="lab">결과</div><p>E1 0.316 → E2 0.338 (+0.022).</p></div>
+        <div><div class="lab">주의</div><p>STES 쏠림은 가중치 탓이 아님(빼도 22%). 아형별 임계값 보정은 중첩 검증에서 하락 → 기각.</p></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-h"><span class="tag">P0</span><h3>test 빈칸 → WT</h3><span class="leak">형식 처리 · 값은 보지 않음</span></div>
+      <div class="pwr">
+        <div><div class="lab">문제</div><p>test.csv에만 빈칸 237개(환자 128명). train 기준 코드가 test에서 멈춤.</p></div>
+        <div><div class="lab">처리</div><p><code>features.fill_missing</code>: 빈칸 = 정보 없음 = WT. <code>build_features</code>가 자동 적용.</p></div>
+        <div><div class="lab">규정</div><p>형식 확인은 EDA가 아님. 분포·통계는 보지 않음.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PAPERS ================= -->
+<section id="papers">
+  <div class="sec-head"><div class="eyebrow">05 · 논문 상세</div><h2>원문 확인한 10편 — 무엇을 말하고, 무엇을 참조할지</h2></div>
+  <div class="tldr"><div class="eyebrow">읽는 법</div><p>수치는 입력·클래스 수·지표가 다르면 비교 불가. 각 카드의 "참조할 것 / 참조하면 안 되는 것"만 가져가면 됩니다. 10편을 한 줄로: <b>점 돌연변이만으로는 49–68%, 복제수·전장 유전체를 더하면 85–91%, 외부 검증에서는 크게 하락, 환자 단위 요약 특성과 선형 모델·특성 선택이 희소 데이터에 강함, 확신도로 선별하면 임상 연결 가능.</b></p></div>
+  <div class="steps">
+    <div class="step"><div class="step-h"><span class="tag">1</span><h3>Yuan et al. 2016 — DeepGene (BMC Bioinformatics)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>TCGA 체세포 점 돌연변이, 12개 암종. DNN + 군집 유전자 선택 + 희소 인덱싱.</p></div><div><div class="lab">결과</div><p>정확도 <b>65.5%</b> (SVM·NB·kNN보다 높음). AI 답변이 83.2%라 한 것은 오류.</p></div><div><div class="lab">참조</div><p>희소 0/1 입력에서 유전자 선택이 효과. 참조 불가: 12종 정확도를 26종 Macro F1과 비교.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">2</span><h3>mClass 2018</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>점 돌연변이. NMI(정규화 상호정보)로 유전자 선택 + 로지스틱 회귀.</p></div><div><div class="lab">결과</div><p><b>67.5%</b>. (AI 답변의 F1 0.81은 오류)</p></div><div><div class="lab">참조</div><p>단순 선형 모델 + 정보량 기반 특성 선택이 딥러닝과 비슷. 특성 선택은 fold 안에서.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">3</span><h3>Soh et al. 2017 (Genome Medicine)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>TCGA 28개 암종. 점 돌연변이만 vs + 복제수 변이(CNV). 선형 SVM·로지스틱 vs RF.</p></div><div><div class="lab">결과</div><p>변이만 <b>49.4%</b> → +CNV <b>88.4%</b>. 선형 &gt; RF. 변이 0 샘플은 제외.</p></div><div><div class="lab">참조</div><p>우리 천장의 근거(변이만 ~50%). 선형 모델 비교 필수. 참조 불가: 88.4%는 CNV 덕.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">4</span><h3>Lee et al. 2019 — CPEM (Scientific Reports)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>31개 암종. 특성을 단계적으로 추가: 유전자 변이 → +변이율 → +기능 영향 → +CNV → 앙상블.</p></div><div><div class="lab">결과</div><p><b>46.9 → 51.2 → 61.0 → 72.7 → 84.1%</b>. 특성 선택은 L1 LinearSVC (AI 답변의 "RF 선택"은 오류).</p></div><div><div class="lab">참조</div><p>"환자 단위 변이율"이 +4.3%p — 우리 P4·E6a의 근거. 단계별 추가 실험 설계의 모범. 참조 불가: 72.7% 이후는 CNV.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">5</span><h3>Jiao et al. 2020 (Nature Communications)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>PCAWG 전장 유전체 2,606개, 24개 암종. 변이 종류·유전체 분포·운전자·경로 특성, DNN.</p></div><div><div class="lab">결과</div><p>홀드아웃 <b>91%</b>, 외부 원발 88%, 전이 83%. <b>운전자만 쓰면 F1 0.33</b>. 경로 특성 추가 이득 작음.</p></div><div><div class="lab">참조</div><p>승객 변이 패턴에 신호 → 침묵 변이 유지(E3)의 근거. 경로 특성 기대치 낮게(E8c +0.004). 참조 불가: 91%는 전장 유전체 위치 정보.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">6</span><h3>Marquard et al. 2015 — TumorTracer (BMC Medical Genomics)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>점 돌연변이 + 염기 문맥 + CNV. 원발 부위 분류.</p></div><div><div class="lab">결과</div><p>유전자만 <b>55%</b> → +염기 문맥 <b>66.6%</b> → +CNV 85%. 외부 검증 <b>46%</b>.</p></div><div><div class="lab">참조</div><p>염기 문맥(시그니처)이 +11.6%p — 우리는 염기가 없어 아미노산 치환으로 근사(E6b·6그룹). 외부 검증 하락 = CV≠리더보드의 선례.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">7</span><h3>Liu et al. 2020 (ICGC 13개 암종)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>ICGC 체세포 변이, 13개 암종. L1 로지스틱 회귀.</p></div><div><div class="lab">결과</div><p><b>86.7%</b> (13종, 서로 멀리 떨어진 암 위주).</p></div><div><div class="lab">참조</div><p>L1 선형 모델이 희소 변이 데이터에서 강함 → 모델 5종 비교에 포함. 참조 불가: 13종 vs 26종.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">8</span><h3>Sanjaya et al. 2023 — MuAt (Genome Medicine)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>변이를 토큰으로 보는 어텐션 모델. PCAWG WGS 24종 / TCGA 엑솜 20종.</p></div><div><div class="lab">결과</div><p>TCGA 엑솜 기준 약 <b>64%</b>, PCAWG WGS 기준 88.8%(top-1). 어느 데이터 기준인지 꼭 붙여서 인용.</p></div><div><div class="lab">참조</div><p>엑솜 변이만으로의 천장이 60%대라는 또 하나의 근거. 참조 불가: 염기 수준 토큰.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">9</span><h3>Moon et al. 2023 — OncoNPC (Nature Medicine)</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>임상 패널(변이·CNV·시그니처·나이·성별) 36,445명, 22개 암종. XGBoost.</p></div><div><div class="lab">결과</div><p>F1 <b>0.784</b>, 확신도 ≥0.9만 보면 <b>0.942</b>. 원발부위불명암(CUP) 971명 중 41.2%를 높은 확신도로 분류, 예측과 일치하는 치료를 받은 환자 생존 향상(HR 0.348).</p></div><div><div class="lab">참조</div><p>"확신도 낮으면 판정 보류" 서비스 설계, 맞춤형 치료 연결의 근거. 참조 불가: 나이·성별·CNV 포함 수치.</p></div></div></div>
+    <div class="step"><div class="step-h"><span class="tag">10</span><h3>성다훈 · 임유진 2024 (ACK 학술대회) — 이 대회 데이터</h3></div>
+      <div class="pwr"><div><div class="lab">입력·클래스</div><p>이 대회 데이터 그대로. PCA + 가우시안 노이즈 증강 + 분류기.</p></div><div><div class="lab">결과</div><p>원본 <b>0.337</b> → 증강 후 0.80 보고. 그림 1 기준 증강은 학습 데이터에만. 그러나 시드·설정·교차검증 정보 없음, 리더보드 점수 아님, 원본 XGB 0.005는 비정상.</p></div><div><div class="lab">참조</div><p>원본 0.337이 우리 베이스라인(0.305)과 같은 수준이라는 확인. 참조 불가: 0.80 (재현 불가).</p></div></div></div>
+  </div>
+  <h3>국내 임상 연구 2편 (혜원님 공유)</h3>
+  <p>삼성서울병원 이세훈 교수팀 2026 (소세포폐암 RNA-seq, 분자 아형 4개·의사병기 순위)과 분당차병원 이원석 교수팀 2026 (간세포암 다중오믹스, 침윤성 Type IV·TP53/ATM). 분류 모델이 아니라 "아형이 치료 반응을 가른다"는 근거로 맞춤형 치료 섹션에 정리.</p>
+</section>
+
+<!-- ================= LIT ================= -->
+<section id="lit">
+  <div class="sec-head"><div class="eyebrow">논문 요약표 · 파생변수</div><h2>요약표, 비교 불가 연구, 파생변수 Top 8</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>논문</th><th>입력</th><th class="num">클래스</th><th>지표·결과</th><th>우리와의 거리</th></tr></thead>
+    <tbody>
+      <tr><td>DeepGene 2016</td><td>점 돌연변이</td><td class="num">12</td><td>정확도 65.5%</td><td>가까움 (클래스 적음)</td></tr>
+      <tr><td>mClass 2018</td><td>점 돌연변이</td><td class="num">—</td><td>67.5%</td><td>가까움</td></tr>
+      <tr><td>Soh 2017</td><td>변이 / +CNV</td><td class="num">28</td><td>49.4% / 88.4%</td><td>변이만 수치가 우리 천장</td></tr>
+      <tr><td>CPEM 2019</td><td>변이 → +변이율 → +CNV</td><td class="num">31</td><td>46.9 → 61.0 → 84.1%</td><td>61%까지 가까움</td></tr>
+      <tr><td>Jiao 2020</td><td>전장 유전체</td><td class="num">24</td><td>91%, 운전자만 F1 0.33</td><td>멀음 (위치 정보)</td></tr>
+      <tr><td>TumorTracer 2015</td><td>변이 / +문맥 / +CNV</td><td class="num">—</td><td>55 / 66.6 / 85%, 외부 46%</td><td>55~66%가 우리 선</td></tr>
+      <tr><td>Liu 2020</td><td>변이 (ICGC)</td><td class="num">13</td><td>86.7%, L1 LR</td><td>클래스 적어 높음</td></tr>
+      <tr><td>MuAt 2023</td><td>변이 토큰</td><td class="num">20/24</td><td>64% (엑솜) / 88.8% (WGS)</td><td>엑솜 수치가 우리 선</td></tr>
+      <tr><td>OncoNPC 2023</td><td>패널 + 임상</td><td class="num">22</td><td>F1 0.784, 확신도 ≥0.9 시 0.942</td><td>서비스 설계 참조</td></tr>
+      <tr><td>성다훈·임유진 2024</td><td>이 데이터</td><td class="num">26</td><td>0.337 (→0.80 재현 불가)</td><td>같은 데이터</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>비교 불가 연구 (발현량·CNV·멀티오믹스)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>연구</th><th>입력</th><th>보고 수치</th><th>왜 비교 불가</th></tr></thead>
+    <tbody>
+      <tr><td>Lyu &amp; Haque 2018</td><td>RNA 발현량 → 2D 이미지 CNN</td><td>33종 95%+</td><td>발현량. 우리 데이터에 없음</td></tr>
+      <tr><td>Mohammed 2021</td><td>발현량 + 스태킹</td><td>5종 99%</td><td>발현량, 5종</td></tr>
+      <tr><td>Ameen 2025</td><td>RNA + 변이 + 메틸화 오토인코더</td><td>96 → 98%</td><td>멀티오믹스</td></tr>
+      <tr><td>박윤정·박승수 2006</td><td>마이크로어레이 발현</td><td>—</td><td>발현량, 20년 전 기법</td></tr>
+      <tr><td>국내 CNV 특허·기술</td><td>복제수 변이</td><td>—</td><td>CNV 없음</td></tr>
+      <tr><td>"TumorOriginPredictor (Singh 2024)"</td><td>—</td><td>—</td><td>AI 답변이 제시했으나 <b>존재 확인 불가</b> → 인용 금지</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>현실적 천장</h3>
+  <p>점 돌연변이만: 정확도 49–68% (클래스 수 적을수록 높음). 26종 Macro F1은 정확도보다 낮으니 <b>0.45–0.55</b>가 현실적 최상단. 리더보드 현재 0.354(명석 AI 노트북). 발표는 "천장 근처 + 남은 오차의 이유"로.</p>
+
+  <h3>파생변수 Top 8 — 논문 근거와 검증 상태</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>특성</th><th>근거</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td>유형별 변이 부담 (침묵·미스센스·정지·fs 개수·비율)</td><td>CPEM 변이율</td><td><b>채택</b> E6a +0.024</td></tr>
+      <tr><td>②</td><td>아미노산 치환 패턴 (12종 + 6그룹 전이)</td><td>TumorTracer 염기 문맥 근사</td><td><b>채택</b> E6b +0.009, 6그룹 +0.020</td></tr>
+      <tr><td>③</td><td>핫스팟 (cancerhotspots.org, 137 유전자 겹침)</td><td>Chang 2016</td><td>월 · 명석</td></tr>
+      <tr><td>④</td><td>신호경로 10개 변이 부담</td><td>Sanchez-Vega 2018 Table S3</td><td><b>채택(안정성)</b> E8c +0.004</td></tr>
+      <tr><td>⑤</td><td>드라이버 157개 절단형/미스센스 2채널</td><td>Vogelstein 20/20, Bailey 2018</td><td>채택 E7 +0.012 — <b>리더보드 과적합 의심, 토요일 확인</b></td></tr>
+      <tr><td>⑥</td><td>긴 유전자 보정 (FLAGS 30 겹침)</td><td>Shyr 2014</td><td>월 · 민준</td></tr>
+      <tr><td>⑦</td><td>과돌연변이 · MMR/POLE 플래그</td><td>Bailey 2018 Table S5</td><td>월 · 민준</td></tr>
+      <tr><td>⑧</td><td>fold 내 특성 선택 + 클래스별 임계값</td><td>mClass, CPEM</td><td>임계값 <b>기각</b>(중첩 0.434→0.426). 특성 선택 = 경량화 표</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>신호경로 10개 (Sanchez-Vega 2018)</h3>
+  <p class="mono" style="font-size:.85rem">Cell cycle · HIPPO · MYC · NOTCH · NRF2 · PI3K · RTK-RAS · TGF-β · TP53 · WNT — 334 유전자 중 우리 열 184개 겹침. <code>refs/pathways_sanchezvega2018.csv</code></p>
+
+  <h3>참조 파일 (refs/) — 전부 "지식", 환자 데이터 아님</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>파일</th><th>출처</th><th class="num">항목</th><th class="num">우리 열 겹침</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">pathways_sanchezvega2018.csv</td><td>Cell 2018, Table S3</td><td class="num">334 유전자</td><td class="num">184</td></tr>
+      <tr><td class="mono">drivers_bailey2018.csv</td><td>Cell 2018 (oncogene 70 · TSG 86 · possible 143)</td><td class="num">299</td><td class="num">157</td></tr>
+      <tr><td class="mono">hotspots_chang2016.csv</td><td>cancerhotspots.org v2</td><td class="num">1,165 핫스팟 / 247 유전자</td><td class="num">137</td></tr>
+      <tr><td class="mono">flags_shyr2014.csv</td><td>BMC Med Genomics 2014</td><td class="num">100</td><td class="num">30</td></tr>
+      <tr><td class="mono">mmr_pole_genes.csv</td><td>Bailey 2018 · TCGA CRC 2012</td><td class="num">6</td><td class="num">5</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= PROMPTS ================= -->
+<section id="prompts">
+  <div class="sec-head"><div class="eyebrow">자료조사 프롬프트</div><h2>생성형 AI에 물어볼 때 — 복사해서 쓰기</h2></div>
+  <div class="tldr"><div class="eyebrow">규칙</div><p>AI 답변의 논문·수치는 <b>원문 확인 전까지 가이드에 넣지 않는다.</b> 지금까지 지어낸 논문 1건, 수치 오류 5건(DeepGene 83.2%→65.5%, mClass 0.81→67.5%, CPEM RF→L1 LSVC, TumorTracer 85%는 CNV 포함, TumorOriginPredictor 미존재)을 잡아냈습니다. 모든 프롬프트 끝에 아래 공통 조건을 붙입니다.</p></div>
+  <div class="prompt"><div class="prompt-h"><h3>공통 조건 블록 (모든 질문 끝에 붙이기)</h3><button class="copy" type="button" data-for="p0">복사</button></div>
+<pre id="p0">[조건]
+- 우리 데이터: 환자 6,201명 × 유전자 4,384개, 각 칸은 WT 또는 단백질 변이 표기(R273H, R213*, L1854fs 등). 발현량·복제수·염기서열·임상정보 없음. 정답은 TCGA 코호트 26개(KIPAN·GBMLGG·STES 통합 라벨 포함). 지표 Macro F1.
+- 답변할 때 논문은 제1저자·연도·학술지·DOI를 반드시 적고, 입력 데이터 종류·클래스 수·지표·수치를 분리해서 쓸 것. 확실하지 않은 수치는 "미확인"이라고 표시.
+- 발현량·CNV·멀티오믹스 연구는 "비교 불가"로 따로 분류.
+- 외부 환자 데이터 사용은 금지이므로 그런 제안은 하지 말 것. 논문의 유전자 목록 같은 지식은 가능.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>1. 이 대회 데이터를 직접 쓴 연구</h3><button class="copy" type="button" data-for="p1">복사</button></div>
+<pre id="p1">DACON "암환자 유전체 데이터의 변이 정보를 활용한 암종 분류" 대회 데이터(TCGA 26개 코호트, 유전자 4,384개 단백질 변이 표기)를 직접 사용한 논문·학술대회 발표·기술 보고서를 찾아줘. 각각 전처리 방법, 모델, 검증 방식(교차검증/홀드아웃/리더보드), Macro F1 수치, 재현 가능 여부(시드·설정 공개)를 표로. 재현 정보가 없는 수치는 그렇게 표시해줘.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>2. 파생변수 설계 문헌</h3><button class="copy" type="button" data-for="p2">복사</button></div>
+<pre id="p2">체세포 점 돌연변이 데이터(유전자별 변이 유무 + 단백질 변이 표기)만으로 암종을 분류할 때 효과가 보고된 파생변수(feature)를 문헌 근거와 함께 정리해줘. 각 파생변수마다: 계산 방법(환자 한 명의 입력만으로 계산 가능한지), 근거 논문, 그 논문에서의 효과 크기, 우리 데이터에서 계산 가능한지(염기서열·CNV가 필요한 것은 제외). 이미 검증한 것: 변이 유형별 개수·비율, 아미노산 치환 패턴, 드라이버 2채널, 신호경로 부담. 이것 외의 것 위주로.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>3. 아형별 어려운 이유 (도메인)</h3><button class="copy" type="button" data-for="p3">복사</button></div>
+<pre id="p3">TCGA 코호트 중 SARC, THYM, PCPG, DLBC, LUAD, PRAD, KIPAN, GBMLGG, CESC, PAAD를 체세포 점 돌연변이만으로 분류할 때 왜 어려운지, 각 암의 유전체 특징(주된 변이 유형, 핵심 유전자, 변이 부담, 종양 순도, 바이러스 원인, 통합 코호트 여부)으로 설명해줘. 핵심 유전자는 다음 목록에 있는지 표시: [우리 열에 있는 유전자 목록 붙이기]. 근거는 TCGA 각 코호트의 marker paper를 인용.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>4. 모델·검증 방법</h3><button class="copy" type="button" data-for="p4">복사</button></div>
+<pre id="p4">고차원 희소 이진 특성(4,000+열, 99% 0) + 환자 단위 요약 특성(400열)으로 26클래스 불균형 분류(최대/최소 20배)를 할 때, 트리 부스팅·선형 모델(L1 로지스틱, 선형 SVM)·MLP의 장단점과 문헌 근거를 정리해줘. 내부 교차검증 점수보다 외부 테스트 점수가 0.1 이상 낮게 나오는 경우 원인 후보와 진단 방법(규정상 테스트 데이터는 볼 수 없음)을 제안해줘.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>5. 맞춤형 치료 연결</h3><button class="copy" type="button" data-for="p5">복사</button></div>
+<pre id="p5">암종 분류 모델의 예측 결과를 정밀 의료(표적치료·면역치료 선택)에 연결하는 실제 사례와 근거 체계를 정리해줘: OncoKB·AMP/ASCO/CAP 등급 체계가 암종별로 어떻게 다른지(BRAF V600E 흑색종 vs 대장암 예시), 원발부위불명암(CUP)에서 분류 모델이 치료 결정에 쓰인 연구(OncoNPC 등), 국내 규제(식약처 AI 의료기기)에서 "진단 보조"의 범위. 각 항목에 원문 출처.</pre></div>
+  <div class="prompt"><div class="prompt-h"><h3>6. 국내 연구 · 산업 동향</h3><button class="copy" type="button" data-for="p6">복사</button></div>
+<pre id="p6">한국 연구진이 2020년 이후 발표한 암 유전체 기반 아형 분류·치료 반응 예측 연구를 정리해줘(기관, 제1저자, 학술지, DOI, 입력 데이터 종류, 핵심 결과). 변이 데이터만 쓴 연구와 발현량·다중오믹스 연구를 구분하고, 국내 정밀의료 산업(유전자 패널 검사, AI 진단 보조 허가 사례)의 현황도 출처와 함께.</pre></div>
+</section>
+
+<!-- ================= EXP ================= -->
+<section id="exp">
+  <div class="sec-head"><div class="eyebrow">실험 기록</div><h2>E0 → E8, 그리고 리더보드</h2></div>
+  <div class="tldr"><div class="eyebrow">조건</div><p>모든 실험: XGBoost (n_estimators=100, max_depth=6, learning_rate=0.1, tree_method='hist', balanced sample_weight), SEED 42. E5g부터 StratifiedGroupKFold(5, 프로필 해시). 점수는 fold 평균 ± 표준편차. 리더보드는 Public = test 전체.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>변경</th><th class="num">Macro F1</th><th class="num">Δ</th><th>해석</th></tr></thead>
+    <tbody id="exp-body"><tr><td colspan="5" style="color:var(--muted)">실험 결과를 채우는 중입니다.</td></tr></tbody>
+  </table></div>
+
+  <h3>리더보드 (11.06)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>모델</th><th class="num">CV</th><th class="num">리더보드</th><th class="num">차이</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>명석 AI 노트북 (0/1 전체 + 치환 20×20 + 6그룹 + 경로 7, 규제 XGB)</td><td class="num">0.437</td><td class="num"><b>0.354</b></td><td class="num">−0.08</td></tr>
+      <tr><td>2</td><td>우리 E8 (깊이 6)</td><td class="num">0.450</td><td class="num">0.307</td><td class="num">−0.14</td></tr>
+      <tr><td>3</td><td>우리 E8 + 규제 설정 (깊이 4)</td><td class="num">0.444</td><td class="num">0.305</td><td class="num">−0.14</td></tr>
+      <tr><td>4</td><td>혜원 스태킹 (test-fit 2곳 수정판)</td><td class="num">0.341</td><td class="num">0.253</td><td class="num">−0.09</td></tr>
+      <tr><td>5 (11.09)</td><td>명석 특성 5,281열 + 우리 설정 (깊이 6·100그루)</td><td class="num">0.451</td><td class="num"><b>0.345</b></td><td class="num">−0.11</td></tr>
+      <tr><td>예정</td><td>① E7 (CV 0.429) ② E8−드라이버 2채널 (CV 0.416) — 우리 특성 어디가 문제인지 (화요일 아침)</td><td class="num">—</td><td class="num"></td><td class="num"></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>경량화 — 유전자 열을 줄이면 (E8 특성, 그룹 5-fold)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>유전자 열 (train 변이 빈도 상위, fold 안에서 선택)</th><th class="num">전체 열</th><th class="num">Macro F1</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr><td>0 (요약 특성 407열만)</td><td class="num">407</td><td class="num">0.404 ± 0.011</td><td>점수의 대부분은 환자 단위 요약 특성에서</td></tr>
+      <tr><td>상위 100</td><td class="num">507</td><td class="num">0.408 ± 0.010</td><td></td></tr>
+      <tr><td>상위 300</td><td class="num">707</td><td class="num">0.416 ± 0.016</td><td><b>경량화 후보</b>: 전체 대비 −0.015, 열 1/6, 학습 6배 빠름</td></tr>
+      <tr><td>상위 1,000</td><td class="num">1,407</td><td class="num">0.415 ± 0.014</td><td>300과 차이 없음 — 그 밖은 노이즈</td></tr>
+      <tr><td>전부 4,230</td><td class="num">4,637</td><td class="num">0.431 ± 0.011</td><td>이 실행의 기준점</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">열을 많이 넣을수록 CV는 조금 오르지만(수확 체감), 리더보드에서는 train에만 맞는 열이 손해일 수 있음. 실제 병원 유전자 패널이 수백 개라는 점에서 300개 모델이 서비스 이야기와 맞음.</p>
+
+  <h3>모델 5종 비교 (E8 특성 동일, 그룹 5-fold, 튜닝 없음)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>모델</th><th>설정</th><th class="num">Macro F1</th><th class="num">5-fold 시간</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr><td><b>XGBoost</b></td><td>100그루 · 깊이 6 · lr 0.1 · balanced</td><td class="num"><b>0.432 ± 0.011</b></td><td class="num">4.7분</td><td>기준. 가장 높고 안정</td></tr>
+      <tr><td>LightGBM</td><td>300그루 · lr 0.05 · leaves 31 · colsample 0.5 · balanced</td><td class="num">0.416 ± 0.024</td><td class="num">5분</td><td>비슷하지만 흔들림 큼. 튜닝 여지</td></tr>
+      <tr><td>선형 SVM</td><td>C 0.05 · balanced · 요약 특성 표준화</td><td class="num">0.374 ± 0.016</td><td class="num">7분</td><td>Soh 2017은 선형 &gt; RF였지만 우리 데이터에선 트리가 앞서. 다만 리더보드(분포 차이)에서는 다를 수 있어 일요일 1회 제출 후보</td></tr>
+      <tr><td>L1 로지스틱</td><td>C 0.1 · saga · balanced</td><td class="num">0.365 ± 0.012</td><td class="num">54분</td><td>느리고 낮음. L1이 고른 유전자는 경량화 참고용</td></tr>
+      <tr><td>MLP (256)</td><td>1층 · alpha 1e-3 · early stopping</td><td class="num">0.358 ± 0.036</td><td class="num">1.3분</td><td>GPU 없이 작게. 가장 불안정 → 제외</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">결론: 트리 부스팅(XGBoost) 유지. 선형 모델은 CV에서 0.06 낮지만 "train을 덜 외우는" 성질이라 리더보드 확인 가치는 있음. 앙상블은 XGBoost + LightGBM 확률 평균부터.</p>
+
+  <h3>점수가 낮은 아형 (E8 기준, 그룹 5-fold 평균)</h3>
+  <p class="caption">E5에서 최하위였던 CESC(0.13→0.35)·PAAD(0.15→0.35)·KIPAN(0.16→0.34)·GBMLGG(0.28→0.39)는 파생변수로 크게 올랐고, 남은 하위권은 <b>점 돌연변이 자체가 적거나 핵심 유전자가 열에 없는 암</b>이라 데이터 한계로 설명합니다. 상위: SKCM 0.86 · COAD 0.77 · ACC 0.70 · THCA 0.68 · UCEC 0.63.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>아형</th><th class="num">train 환자 수</th><th class="num">아형별 F1</th><th>가능한 원인</th></tr></thead>
+    <tbody id="weak-body"><tr><td colspan="4" style="color:var(--muted)">실험 결과를 채우는 중입니다.</td></tr></tbody>
+  </table></div>
+</section>
+
+<!-- ================= CARE ================= -->
+<section id="care">
+  <div class="sec-head"><div class="eyebrow">발표 핵심</div><h2>이 모델로 맞춤형 치료는 어떻게 달라지나</h2></div>
+  <div class="tldr"><div class="eyebrow">강사님 요청</div><p>모델을 어떻게 만들었는지를 넘어, 이 성능으로 현실의 암 치료가 어떻게 달라질 수 있는지, 서비스로 만든다면 어떻게 할지까지 제시하는 팀이 많지 않았다. 여기가 차별화 지점입니다.</p></div>
+
+  <h3>왜 아형을 맞혀야 치료가 정해지나</h3>
+  <p>같은 변이라도 암 종류에 따라 약의 효과가 다릅니다. OncoKB(미국 MSK의 정밀종양학 지식베이스)는 BRAF V600E를 흑색종에서는 FDA 승인 표적치료의 근거(Level 1)로, 대장암에서는 단독요법 결과가 실망스러운 단계(Level 2B)로 분류합니다. 즉 변이 목록만 있고 암 아형을 모르면 치료 결정을 내릴 수 없습니다. 우리 train에는 V600E 표기가 305번, IDH1 R132H가 349번 나옵니다.</p>
+
+  <h3>서비스 시나리오: 유전자 검사 결과 → 치료 후보</h3>
+  <ol class="rules">
+    <li><div><b>입력</b><span>환자의 유전자 패널 검사 결과 (어떤 유전자에 어떤 변이가 있는지). 경량화 모델이면 300개 패널로도 가능</span></div></li>
+    <li><div><b>아형 예측 + 확신도</b><span>경량 모델이 26개 아형 확률을 내고, 상위 3개를 확률과 함께 보여줌. OncoNPC처럼 확신도가 낮으면 "추가 검사 권장"으로 표시</span></div></li>
+    <li><div><b>근거 보여주기</b><span>이 예측에 크게 작용한 유전자 (특성 중요도, SHAP). 의사가 "왜"를 확인할 수 있게</span></div></li>
+    <li><div><b>치료 후보 연결</b><span>예측 아형 × 환자의 변이를 지식베이스(OncoKB 등)에 대조해 표적치료·임상시험 후보를 근거 수준과 함께 제시</span></div></li>
+    <li><div><b>최종 판단은 의료진</b><span>진단 보조 도구로 설계. 병리 진단을 대체하지 않음</span></div></li>
+  </ol>
+
+  <div class="tbl"><table>
+    <thead><tr><th>쓰임새</th><th>현실의 근거</th></tr></thead>
+    <tbody>
+      <tr><td><b>원발부위불명암(CUP)</b><br><span class="caption">암이 어디서 시작했는지 모르는 환자</span></td><td>OncoNPC는 CUP 환자 971명 중 41.2%를 높은 확신도로 분류했고, 예측과 일치하는 치료를 받은 환자의 생존이 더 좋았습니다 (위험비 0.348, 관찰 연구). 유전체 기반 치료 대상자도 12.7%에서 27.8%로 늘 수 있다고 보고했습니다.</td></tr>
+      <tr><td><b>조직 진단이 애매할 때 교차 확인</b></td><td>병리 소견과 유전체 예측이 다르면 재검토 알림. GBMLGG↔LGG, KIPAN↔KIRC처럼 경계가 애매한 아형에서 특히 의미</td></tr>
+      <tr><td><b>임상시험 매칭</b></td><td>아형 + 표적 변이 조합으로 참여 가능한 시험 후보 추리기</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>국내 임상 연구 2편 — "분자 아형이 치료를 바꾼다"는 근거 (혜원님 공유, 원문 확인)</h3>
+  <p>두 편 모두 <b>우리 과제와 같은 분류 모델은 아닙니다</b> (전사체·다중오믹스 사용, 우리 26개 아형과도 다름). 대신 발표의 "맞춤형 치료" 장에서 <b>"아형을 나누면 실제로 치료 결정이 달라진다"</b>는 국내 최신 사례로 인용합니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>논문</th><th>무엇을 했나</th><th>우리가 참조할 것</th><th>참조하면 안 되는 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>Kim J, Lee KJ … Lee SH (2026)</b><br>Exp Mol Med · 삼성서울병원 이세훈 교수팀<br><span class="caption">doi:10.1038/s12276-026-01878-x</span></td><td>소세포폐암(SCLC) 361명(제한기 100 · 확장기 261)의 RNA-seq(발현량)로 병기별 분자 특성 분석. 제한기는 B세포·면역 신호, 확장기는 MYC 표적·산화적 인산화(OXPHOS)가 높음. NMF 군집으로 4개 분자 아형(INE·NE·OXPHOS·MYC) 정의, '의사병기 순위(pseudostage rank)'가 높은 확장기 환자는 항암+면역치료 생존이 5.8개월 짧음(P&lt;0.05)</td><td>① 임상 병기만으로는 부족하고 분자 아형이 치료 반응을 가른다는 메시지 ② 아형별 치료 전략 표 형식 ③ 검증 방식: 80/20 분할을 10회 반복 — 우리도 "분할 1번 결과는 믿지 않는다"는 근거</td><td>성능 수치 비교(분류기가 아님), 변이 데이터 아님, SCLC는 우리 26개 아형에 없음(LUAD·LUSC만 있음)</td></tr>
+      <tr><td><b>Lee WS, Woo S … Chon HJ (2026)</b><br>Clin Mol Hepatol 32:258 · 분당차병원 이원석 교수팀<br><span class="caption">doi:10.3350/cmh.2025.0792</span></td><td>진행성 간세포암(HCC) 307명, 아테졸리주맙+베바시주맙(면역치료) 환자를 영상 형태로 4형으로 나눔. 침윤성 Type IV는 반응률 14.6%(Type I 61%), 생존 중앙값 7.1개월로 최악. 다중오믹스에서 Type IV는 <b>TP53·ATM 기능 소실 변이</b>, 증식·EMT·TGF-β·면역억제 경로 상승. 외부 코호트 5개(IMbrave150 포함)로 검증</td><td>① "변이(TP53) + 아형 → 치료 반응 예측"의 국내 사례 ② 우리 데이터의 LIHC에서 TP53 변이 비율을 세어 연결 가능 ③ 외부 코호트로 검증하는 태도</td><td>ATM은 <b>우리 열에 없음</b> (숙지사항 참고) · 영상·발현·단백체 결합 연구라 성능 비교 불가 · 진단 분류가 아니라 치료 반응 예측</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">발표 문장 예시: "삼성서울병원·분당차병원의 2026년 연구처럼, 같은 암이라도 분자 아형에 따라 면역치료 반응이 61%에서 15%까지 달라집니다. 변이 정보로 아형을 먼저 맞히는 우리 모델은 이런 치료 분기의 첫 단계입니다."</p>
+
+  <h3>발표할 때 지킬 것</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>항목</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>표현</td><td>"진단"이 아니라 "의사결정 보조". 확률 보정과 확신도 기준을 두고 기준 미만이면 "판정 보류"</td></tr>
+      <tr><td>근거 등급은 암종별</td><td>AMP/ASCO/CAP 기준은 변이의 임상적 의미를 Tier I(해당 암종에서 강한 근거)~IV(양성)로 나누고, 등급을 암종 기준으로 매깁니다. OncoKB도 마찬가지</td></tr>
+      <tr><td>BRAF V600E 예시</td><td>흑색종은 BRAF 억제제가 잘 듣지만, 대장암은 EGFR이 다시 켜져 단독 억제가 듣지 않아 2020년 FDA가 encorafenib + cetuximab 병용을 승인했습니다. 암종을 잘못 분류하면 치료 해석이 바뀝니다</td></tr>
+      <tr><td>규제</td><td>유전체 서열을 분석해 진단·예후에 쓰는 소프트웨어는 미국 FDA에서 의료기기로, 한국은 식약처 디지털의료제품법·AI 의료기기 가이드라인의 허가 대상. 서비스 기획 시 "연구·보조용" 범위를 명시</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">치료 연결은 발표용 서비스 시나리오입니다. 약물별 근거 수준은 계속 바뀌므로 발표 전 OncoKB 최신 자료로 확인합니다. OncoKB는 우리 모델 학습에는 쓰지 않습니다 (외부 데이터 금지).</p>
+</section>
+
+<!-- ================= PLAN ================= -->
+<section id="plan">
+  <div class="sec-head"><div class="eyebrow">06 · 일정</div><h2>주말 팀장 실험 + 월·화 팀 실험 + 수·목 발표 연습</h2></div>
+  <div class="tldr"><div class="eyebrow">팀장 결정 · 중요</div><p><b>주말(11.07–08)은 팀 휴식, 팀장이 혼자 실험해 월요일 출발선을 만듭니다. 팀 실험은 월·화(11.09–10) 이틀, 11.10(화) 저녁 최종 모델 확정, 11.11–12은 발표 연습.</b> 이유: 마지막까지 점수를 쪼으면 코드 재현 확인·발표 연습·회고 시간이 없어집니다. 점수는 90%지만 상위권 차이는 작고, 발표 10%와 데이터 해석(동점 기준)은 연습량에 비례합니다. 11.11 이후 모델 변경은 "리더보드가 +0.01 이상 오르는 것"만 허용하고 팀장이 판단합니다.</p></div>
+  <div class="days">
+    <div class="day"><div class="d"><b>11.06 금</b>Day 1 · 완료</div><div><ul><li>규정·데이터·논문 조사 → 가이드, 레포 push, 파이프라인 E0→E8 (CV 0.450)</li><li>리더보드 4회: 최고 0.354(명석 AI 노트북), E8 0.307 → CV≠리더보드 확인</li><li>팀원 모델 2개 코드 리뷰, test 빈칸·중복 토큰 함정 처리, 명석님 PR #1 머지</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.07 토</b>팀장 단독</div><div><ul><li>제출 ③ AI 특성+우리 설정 → ② E8−드라이버 2채널 → ① E7 → 어느 특성이 test에 안 맞는지 확정</li><li>결과에 따라 특성 세트 재선정, 경량화 2차 (리더보드 기준)</li><li>가이드 일지·실험 로그 갱신. 팀원은 휴식</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.08 일</b>팀장 단독</div><div><ul><li>모델 5종 비교 (XGBoost · LightGBM · L1 로지스틱 · 선형 SVM · MLP) — 같은 특성, 같은 그룹 5-fold, 리더보드 2회</li><li>월요일 팀 출발선 노트북 확정 (리더보드 기준 최고 특성 세트), 공통 데이터 경로 셀 적용</li><li>팀원별 월요일 과제 카드 작성 (각 1개 파생변수 + 역할), PPT 스토리보드 초안</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.09 월</b>팀 Day 1</div><div><ul><li>10:00 스탠드업. 오전: 재현 확인(전원), 역할 확정, 각자 파생변수 1개 실험 시작 (명석 ③핫스팟 · 민준 ⑥FLAGS+⑦MMR/POLE · 혜원 스태킹에 0/1 행렬 추가)</li><li>오후: 결과 모아 통합 실험, 리더보드 4회는 "원인 가르기"에 사용</li><li>저녁: 혼동 행렬·아형별 F1로 약한 아형 분석</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.10 화</b>팀 Day 2 · 확정</div><div><ul><li>오전: 튜닝(최종값 숫자로 고정), 앙상블 검토, 경량화 비교표</li><li>오후: <b>최종 후보 확정</b>, 단일 .ipynb로 통합(<code>/data</code> 경로), 새 런타임에서 재실행 → 제출 파일 동일 확인</li><li>저녁: PPT 스토리보드 합의, 파트 배분</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.11 수</b>발표 준비</div><div><ul><li>PPT 초안 완성 (각자 파트), 특성 중요도·혼동 행렬 그림 확정</li><li>맞춤형 치료·서비스 시나리오 장 (혜원: 국내 논문 2편), OncoKB 등급 재확인</li><li>1차 리허설 (시간 재기) → 20분 초과분 삭제</li></ul></div></div>
+    <div class="day"><div class="d"><b>11.12 목</b>발표 준비</div><div><ul><li>예상 질문 20개 (Leakage, 왜 이 전처리, CV≠리더보드, 왜 이 아형이 약한가, 경량화 근거)</li><li>2차·3차 리허설, 발표자 순서·전환 연습</li><li>제출 체크리스트 전체 확인, README·참고문헌 정리, 각자 회고 메모</li></ul></div></div>
+    <div class="day deadline"><div class="d"><b>11.13 금</b>발표</div><div><ul><li>11:50 리더보드 마감 (조교 스크린샷) · 13:00 발표 20분</li><li>23:59 코드(팀장 → 조교 디스코드 DM) · PPT · 레포 링크(노션 7조 페이지)</li></ul></div></div>
+  </div>
+  <p>7조 팀원: 엄태은(팀장) · 이명석 · 김민준 · 신혜원. 역할은 각자 안 해본 파트를 우선으로 정합니다. 노션 7조 페이지에 <b>GitHub Repository 링크</b>와 <b>발표 자료(PPT)</b>를 제출합니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>역할</th><th>담당</th><th>하는 일</th></tr></thead>
+    <tbody>
+      <tr><td>팀장 · 통합</td><td>엄태은</td><td>실험 기록 관리, 최종 코드 통합, 제출, Git 관리, 경량화</td></tr>
+      <tr><td>전처리 · 파생변수</td><td>이명석 (③핫스팟) · 김민준 (⑥⑦)</td><td>월요일 과제. 결과는 <code>logs/experiments.md</code>에</td></tr>
+      <tr><td>모델 · 튜닝</td><td>신혜원 (스태킹) · 엄태은 (5종 비교)</td><td>같은 특성·같은 5-fold로 비교, 앙상블 검토</td></tr>
+      <tr><td>분석 · 발표</td><td>논의 후 결정 (월)</td><td>약한 아형 분석, 특성 중요도 해석, PPT, 맞춤형 치료 장(혜원: 국내 논문 2편)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="gloss">
+  <div class="sec-head"><div class="eyebrow">07 · 용어 사전</div><h2>팀 대화에서 자주 나올 말</h2></div>
+  <dl class="gloss">
+    <dt>아형 (SUBCLASS)</dt><dd>같은 계열의 암을 유전자 패턴에 따라 나눈 세부 종류. 치료 방침과 예후가 달라집니다.</dd>
+    <dt>WT (Wild Type)</dt><dd>정상형. 그 유전자에 변이가 없다는 뜻.</dd>
+    <dt>Macro F1</dt><dd>아형마다 F1을 구해 단순 평균한 점수.<small>F1 = 정밀도(맞혔다고 한 것 중 진짜 맞은 비율)와 재현율(진짜 정답 중 찾아낸 비율)의 조화평균</small></dd>
+    <dt>교차검증 (CV)</dt><dd>train을 여러 조각으로 나눠 번갈아 채점하는 내부 시험. 리더보드 제출을 아끼는 장치.</dd>
+    <dt>Stratified</dt><dd>조각을 나눌 때 아형 비율을 모든 조각에서 똑같이 유지하는 방식. 불균형 데이터에서 필수.</dd>
+    <dt>Data Leakage</dt><dd>test 정보가 학습에 새어 들어가는 것. 적발 시 실격.</dd>
+    <dt>fit / transform</dt><dd><code>fit</code> = 규칙을 배우기 (train만), <code>transform</code> = 배운 규칙 적용하기 (train·test 모두).</dd>
+    <dt>희소 데이터</dt><dd>대부분이 0(WT)이고 값이 드문드문 있는 표.</dd>
+    <dt>클래스 가중치</dt><dd>소수 아형을 틀릴 때 더 큰 벌점을 주는 설정.</dd>
+    <dt>SEED</dt><dd>무작위 과정을 매번 똑같이 만드는 고정값. 재현성의 핵심.</dd>
+    <dt>혼동 행렬</dt><dd>어떤 아형을 어떤 아형으로 잘못 맞혔는지 보여주는 표.</dd>
+    <dt>특성 중요도</dt><dd>모델이 판단할 때 어떤 유전자를 많이 참고했는지 보여주는 값.</dd>
+    <dt>체세포 변이</dt><dd>암 조직에만 생긴 변이 (somatic). 부모에게 물려받은 생식세포 변이(germline)와 구분. 우리 데이터는 체세포 변이만.</dd>
+    <dt>운전자 / 승객 변이</dt><dd>암을 일으킨 변이 / 우연히 쌓인 변이. 암종 구분에는 승객 패턴도 중요.</dd>
+    <dt>핫스팟</dt><dd>여러 환자에게 반복되는 특정 위치 변이 (BRAF V600E, IDH1 R132H). 암 유전자의 특징.</dd>
+    <dt>변이 부담 (TMB)</dt><dd>환자 한 명의 총 변이 수. 흡연·자외선·MSI로 높아짐. 면역항암제 반응 예측에도 쓰임.</dd>
+    <dt>변이 시그니처</dt><dd>변이 원인(흡연·자외선·노화·APOBEC 등)마다 남기는 고유한 염기 치환 패턴. 우리는 아미노산 치환으로 근사.</dd>
+    <dt>MSI / MMR</dt><dd>DNA 복사 오류를 고치는 시스템(MMR)이 고장 나 변이가 폭증한 상태(MSI). 프레임시프트가 많아짐.</dd>
+    <dt>코호트</dt><dd>TCGA에서 암종별로 모은 환자 집단. 우리 SUBCLASS가 코호트 약어. KIPAN·GBMLGG·STES는 여러 코호트를 합친 통합 코호트.</dd>
+    <dt>종양 순도</dt><dd>검사한 조직 중 실제 암세포 비율. 낮으면 변이가 덜 검출됨 (PAAD가 대표).</dd>
+    <dt>OncoKB Level</dt><dd>변이→치료제 근거 등급. Level 1 = FDA 승인, 2 = 표준 진료 지침, 3 = 임상 근거, 4 = 실험실 근거. <b>암종별로 다르게 매김.</b></dd>
+  </dl>
+</section>
+
+<!-- ================= SUBMIT ================= -->
+<section id="submit">
+  <div class="sec-head"><div class="eyebrow">08 · 마지막 날 체크</div><h2>제출 체크리스트</h2></div>
+  <p class="caption">체크 표시는 이 브라우저에만 저장됩니다.</p>
+  <ul class="check" id="checklist">
+    <li><label><input type="checkbox" id="c1">데이터 경로가 <code>/data</code>로 되어 있다</label></li>
+    <li><label><input type="checkbox" id="c2"><code>.ipynb</code> 한 파일, 처음부터 끝까지 오류 없이 실행된다</label></li>
+    <li><label><input type="checkbox" id="c3">맨 위에 OS · 파이썬 · 라이브러리 버전을 적었다</label></li>
+    <li><label><input type="checkbox" id="c4">SEED와 최종 하이퍼파라미터가 숫자로 적혀 있다</label></li>
+    <li><label><input type="checkbox" id="c5">재실행한 결과가 리더보드에 낸 제출 파일과 같다</label></li>
+    <li><label><input type="checkbox" id="c6">test로 fit한 곳, test EDA를 반영한 곳이 없다</label></li>
+    <li><label><input type="checkbox" id="c7">주석 포함, UTF-8 인코딩</label></li>
+    <li><label><input type="checkbox" id="c8">모델 파일이 필요하면 다운로드 링크를 넣었다</label></li>
+    <li><label><input type="checkbox" id="c9">코드는 팀장이 조교 디스코드 DM으로 제출했다</label></li>
+    <li><label><input type="checkbox" id="c11">데이콘 팀 탭에 4명 모두 합쳐졌다 (팀 병합 마감 전)</label></li>
+    <li><label><input type="checkbox" id="c12">Data Leakage 사례집을 팀 전체가 같이 읽었다</label></li>
+    <li><label><input type="checkbox" id="c13">발표 리허설에서 20분 안에 끝났다</label></li>
+    <li><label><input type="checkbox" id="c10">노션 7조 페이지에 GitHub Repository 링크와 발표 자료(PPT)를 넣었다</label></li>
+  </ul>
+</section>
+
+<footer>최종 갱신 2026-11-06 · 모든 수치는 train.csv 기준이며 test 데이터는 분석하지 않았습니다.<br>주요 참고문헌: 성다훈·임유진 2024 (ACK) · Yuan 2016 DeepGene (BMC Bioinformatics) · Soh 2017 (Genome Medicine) · Lee 2019 CPEM (Sci Rep) · Jiao 2020 (Nat Commun) · Sanjaya 2023 MuAt · Moon 2023 OncoNPC (Nat Med) · Sanchez-Vega 2018 (Cell) · Bailey 2018 (Cell) · Chang 2016 (Nat Biotech) · Vogelstein 2013 (Science) · Shyr 2014 FLAGS · Campbell 2017 (Cell) · Chakravarty 2017 OncoKB · Li 2017 AMP/ASCO/CAP · Broad GDAC Firehose</footer>
+</div>
+
+<script>
+const COUNTS={BRCA:786,KIPAN:515,GBMLGG:461,STES:379,KIRC:334,THCA:324,SKCM:276,PRAD:266,OV:253,LGG:229,HNSC:223,COAD:223,SARC:198,UCEC:198,LUAD:184,LUSC:178,LIHC:158,LAML:158,CESC:155,PCPG:147,TGCT:124,PAAD:120,BLCA:104,THYM:98,ACC:72,DLBC:38};
+const MUT={SKCM:85.5,LUSC:57,BLCA:54,STES:41,LUAD:40.5,HNSC:31,DLBC:30,LIHC:25,ACC:24,COAD:23,CESC:20,UCEC:18,TGCT:16,KIPAN:15,PAAD:14,KIRC:13,OV:12,GBMLGG:11,BRCA:9,SARC:9,LGG:8,PRAD:6,THCA:4,PCPG:4,LAML:3,THYM:2};
+const NAMES={BRCA:"유방암",KIPAN:"신장암(통합)",GBMLGG:"뇌교종(통합)",STES:"위·식도암",KIRC:"신장 투명세포암",THCA:"갑상선암",SKCM:"피부 흑색종",PRAD:"전립선암",OV:"난소암",LGG:"저등급 뇌교종",HNSC:"두경부 편평세포암",COAD:"결장암",SARC:"육종",UCEC:"자궁내막암",LUAD:"폐선암",LUSC:"폐 편평세포암",LIHC:"간세포암",LAML:"급성 골수성 백혈병",CESC:"자궁경부암",PCPG:"갈색세포종·부신경절종",TGCT:"고환 생식세포종양",PAAD:"췌장암",BLCA:"방광암",THYM:"흉선종",ACC:"부신피질암",DLBC:"미만성 거대 B세포 림프종"};
+function bars(id,data,low){
+  const el=document.getElementById(id), max=Math.max(...Object.values(data));
+  el.innerHTML=Object.entries(data).map(([k,v])=>`<div class="bar${low&&low(k,v)?' low':''}" title="${k} · ${NAMES[k]}"><span class="k">${k}</span><span class="track"><span class="fill" style="width:${(v/max*100).toFixed(1)}%"></span></span><span class="v">${v}</span></div>`).join('');
+}
+bars('bars-count',COUNTS,(k,v)=>v<150);
+bars('bars-mut',MUT);
+
+/* experiments — filled from CV run */
+const EXP=[
+ {id:'E0',change:'베이스라인 그대로 (변이 문자열 → 임의 번호)',mean:0.3051,std:0.011,note:'비교 기준'},
+ {id:'E1',change:'P1 변이 0/1 + P2 빈 유전자 제거',mean:0.3155,std:0.014,note:'소폭 개선. 문자열 자체보다 "변이 유무"가 핵심이라는 가설 지지. 학습 시간도 약 1/3'},
+ {id:'E2',change:'+ P5 클래스 가중치',mean:0.3380,std:0.010,note:'소수 아형을 억지로 챙기자 Macro F1 상승. 평가 지표와 학습 목표를 맞춘 효과'},
+ {id:'E3',change:'+ P3 침묵 변이 제거',mean:0.3315,std:0.010,note:'<b>오히려 하락.</b> 침묵 변이에도 아형 신호가 있음. Jiao 2020(기능 무관 변이 패턴에 신호)과 같은 방향 → P3 기각'},
+ {id:'E4',change:'E3 + P4 환자당 변이 수',mean:0.3645,std:0.005,note:'한 열 추가로 큰 상승. EDA 발견 4번과 CPEM(변이율 중요도 상위) 지지'},
+ {id:'E5',change:'E2 + P4 (침묵 변이 유지)',mean:0.3802,std:0.009,note:'현재 최고. P1+P2+P4+P5 채택, P3 기각. 베이스라인 대비 +0.075'},
+ {id:'E5g',change:'E5 그대로, 검증만 프로필 묶음 StratifiedGroupKFold',mean:0.3843,std:0.013,note:'일반 CV와 차이 없음 → 중복 환자가 점수를 부풀리지 않았음. 이후 기본 검증은 그룹 CV (아래는 모두 그룹 CV)'},
+ {id:'E6a',change:'+ 변이 유형별 개수·비율 (침묵/미스센스/정지/fs, 10열) — Top8 1번',mean:0.4078,std:0.010,note:'<b>가장 큰 단일 상승.</b> 변이 종류 비율이 암종 원인(흡연·MSI 등)을 드러냄. CPEM 변이율 효과와 같은 방향'},
+ {id:'E6b',change:'+ 아미노산 치환 패턴 12종 개수·비율 (E&gt;*, S&gt;*, R&gt;Q 등, 24열) — Top8 2번',mean:0.4171,std:0.014,note:'염기 정보 없이 변이 시그니처를 근사. TumorTracer 염기 문맥 효과(+11.6%p)의 일부 복원. 치환 종류를 늘리면 더 오를 여지'},
+ {id:'E7',change:'+ 드라이버 157개 유전자 절단형/미스센스 2채널 (314열) — Top8 5번',mean:0.4288,std:0.017,note:'Vogelstein 20/20 규칙. 상승은 있지만 314열 대비 작음 → 경량화에서는 E6b가 효율 지점 후보. <b>현재 최고, 베이스라인 대비 +0.124</b>'},
+ {id:'E7_hpB',change:'E7 특성 그대로, 하이퍼파라미터만 변경 (깊이 4 · 300그루 · 학습률 0.05 · colsample 0.6 · lambda 5)',mean:0.4250,std:0.012,note:'평균은 비슷, 흔들림(±)은 줄어듦. 안정성 후보로 보관. 팀원 AI 노트북(단일 홀드아웃 0.437)의 설정'},
+ {id:'E8a',change:'E7 + 한 칸 안 중복 토큰 수 (2열)',mean:0.4302,std:0.017,note:'효과 없음(+0.001, 오차 안). 가공 흔적이 BRCA·STES에 쏠려 기대했지만 이미 다른 특성이 잡고 있음 → 제외'},
+ {id:'E8b',change:'E7 + 아미노산 <b>6그룹 전이</b> (지방족·방향족·극성·산성·염기성·특수 간 이동, 개수 36 + 비율 36) — Top8 2번 확장',mean:0.4486,std:0.010,note:'<b>+0.020, E6a 이후 가장 큰 상승.</b> 팀원 AI 노트북 아이디어를 우리 그룹 CV로 검증. 12패턴보다 넓게 덮으면서 400열(20×20)보다 작음'},
+ {id:'E8c',change:'E7 + Sanchez-Vega 2018 신호경로 10개 변이 부담 (개수·비율 20열) — Top8 4번',mean:0.4326,std:0.018,note:'+0.004, 오차 안. Jiao 2020의 "경로 특성 이득 작음"과 같은 방향. 단독 효과는 없지만 통합 시 흔들림 감소'},
+ {id:'E8',change:'<b>E7 + 6그룹 전이 + 경로 10개</b> = 현재 팀 기준선 (<code>build_features(level=\'E8\')</code>, 4,637열)',mean:0.4498,std:0.008,note:'<b>현재 최고, 베이스라인 대비 +0.145.</b> 흔들림 ±0.008로 가장 안정. 제출 <code>1106_E8_cv0.450.csv</code> → <b style="color:var(--down,#c0392b)">리더보드 0.307</b> (CV −0.14). 같은 특성에 규제 많은 설정(hpB) CV 0.444 → <b>리더보드 0.305</b> (설정 바꿔도 동일 → 원인은 특성)'},
+ {id:'AI노트북',change:'팀원 AI 노트북: 0/1 + 치환 20×20 + 6그룹 + 경로 7개(출처 없음) 5,281열, 깊이 4·lr 0.05·200그루·규제',mean:0.4366,std:0,note:'단일 홀드아웃이라 ±없음. <b>리더보드 0.354</b> — 현재 리더보드 최고. CV는 우리가 높고 리더보드는 이쪽이 높음 → 특성 차이(드라이버 2채널 유무 등)로 추정, 토요일 제출로 확인'},
+ {id:'혜원 스태킹',change:'혜원님(NotebookLM): XGB(요약 특성 30열) + TF-IDF→LinearSVC + ExtraTrees → 로지스틱 메타, KIPAN/GBMLGG 계층 후처리. TF-IDF·스케일러 test-fit 2곳 수정 후 그룹 CV',mean:0.3405,std:0,note:'계층 후처리는 −0.005(기각). <b>리더보드 0.253</b>. 유전자 0/1이 XGB에 안 들어가는 구조가 낮은 원인으로 추정 → 넣어보기 제안'}
+];
+const WEAK=[
+ {k:'SARC',f1:0.166,why:'육종은 여러 조직에서 생기는 이질적 집단. 복제수 변이가 주된 특징이라 점 돌연변이만으로는 한계. E5→E8 개선 거의 없음(0.19→0.17) — 데이터 한계로 설명'},
+ {k:'THYM',f1:0.272,why:'흉선종. 환자 98명 중 30명이 변이 0개(입력이 전부 WT). 핵심 유전자 GTF2I가 <b>우리 열에 없음</b>'},
+ {k:'PCPG',f1:0.301,why:'갈색세포종. 변이가 매우 적은 암(환자당 중앙값 한 자리). 핵심은 생식세포 변이·융합인데 체세포 점 돌연변이 데이터에는 없음'},
+ {k:'DLBC',f1:0.327,why:'림프종. 환자 38명으로 가장 적음. 5-fold면 fold당 7명이라 점수 자체가 크게 흔들림'},
+ {k:'LUAD',f1:0.336,why:'폐선암 vs 폐 편평세포암(LUSC). 둘 다 흡연 관련 고도변이라 패턴이 비슷. KRAS가 열에 없어 선암 신호 약함'},
+ {k:'PRAD',f1:0.338,why:'전립선암. 점 돌연변이가 적고 융합(TMPRSS2-ERG)·복제수가 주된 특징 — 이 데이터에 없는 정보'}
+];
+function renderExp(){
+  if(!EXP.length) return;
+  const best=Math.max(...EXP.map(e=>e.mean));
+  document.getElementById('exp-body').innerHTML=EXP.map((e,i)=>{
+    const d=i?e.mean-EXP[i-1].mean:null;
+    const delta=d===null?'<span class="pill">기준</span>':`<span class="delta ${d>=0?'up':'down'}">${d>=0?'+':''}${d.toFixed(4)}</span>`;
+    return `<tr><td class="mono">${e.id}${e.mean===best?' <span class="pill best">최고</span>':''}</td><td>${e.change}</td><td class="num">${e.mean.toFixed(4)} <span style="color:var(--muted)">± ${e.std.toFixed(3)}</span></td><td class="num">${delta}</td><td>${e.note}</td></tr>`;
+  }).join('');
+  if(WEAK.length){
+    document.getElementById('weak-body').innerHTML=WEAK.map(w=>`<tr><td><span class="mono">${w.k}</span> <span style="color:var(--muted)">${NAMES[w.k]}</span></td><td class="num">${COUNTS[w.k]}</td><td class="num">${w.f1.toFixed(3)}</td><td>${w.why}</td></tr>`).join('');
+  }
+}
+renderExp();
+
+/* nav: click -> scroll to section (works even when the host swallows hash navigation) */
+document.querySelectorAll('nav.toc a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href')); if(t){e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); try{history.replaceState(null,'',a.getAttribute('href'))}catch(_){}}});
+});
+/* copy buttons for prompts */
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const el=document.getElementById(btn.dataset.for); const txt=el.innerText;
+    const ok=()=>{btn.textContent='복사됨';btn.classList.add('done');setTimeout(()=>{btn.textContent='복사';btn.classList.remove('done')},1500)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨 — Ctrl+C';setTimeout(()=>btn.textContent='복사',2000)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(fallback)}else fallback();
+  });
+});
+
+/* checklist — per-viewer convenience only */
+document.querySelectorAll('#checklist input, #rules input').forEach(cb=>{
+  try{cb.checked=localStorage.getItem('chk-'+cb.id)==='1'}catch(e){}
+  cb.addEventListener('change',()=>{try{localStorage.setItem('chk-'+cb.id,cb.checked?'1':'0')}catch(e){}});
+});
+</script>
